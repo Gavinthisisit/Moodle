@@ -1,0 +1,7 @@
+This files describes API changes in /mod/teamwork - activity modules,
+information provided here is intended especially for developers.
+
+=== 2.7 ===
+
+* The method teamwork::log() has been deprecated in the teamwork module. Please use the event classes instead
+  (mod/teamwork/classes/event).
