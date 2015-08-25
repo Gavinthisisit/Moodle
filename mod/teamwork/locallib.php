@@ -2782,6 +2782,33 @@ class teamwork {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Overview of templets list
+ *
+ * Templets list contains several templets. Each templet contains templet header, templet introduce, and a "join in"
+ * button.
+ */
+
+class teamwork_templet_list implements renderable {
+    /** @var teamwork */
+    public $teamwork;
+    /** @var array of (stdclass)templets*/
+    public $container = array();
+
+    /**
+     * Prepare an tasks list for the given teamwork moudle.
+     *
+     * @param teamwork $teamwork instance
+     */
+    public function __construct(teamwork $teamwork) {
+        //global $DB;
+        // TODO
+        $this->teamwork = $teamwork->id;
+
+        //$this->container = $DB->get_record_list('teamwork_templet', 'teamwork', array($this->teamwork));
+    }
+}
+
+/**
  * Represents the user planner tool
  *
  * Planner contains list of phases. Each phase contains list of tasks. Task is a simple object with

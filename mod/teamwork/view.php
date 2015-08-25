@@ -106,10 +106,13 @@ $userplan = new teamwork_user_plan($teamwork, $USER->id);
 /// Output starts here
 
 echo $output->header();
-echo $output->heading_with_help(format_string($teamwork->name), 'userplan', 'teamwork');
-echo $output->render($userplan);
-
-switch ($teamwork->phase) {
+//echo $output->heading_with_help(format_string($teamwork->name), 'userplan', 'teamwork');
+//echo var_dump($teamwork);
+//die();
+$renderable = new teamwork_templet_list($teamwork);
+echo $output->render($renderable);
+//echo $output->render($userplan);
+/*switch ($teamwork->phase) {
 case teamwork::PHASE_SETUP:
     if (trim($teamwork->intro)) {
         print_collapsible_region_start('', 'teamwork-viewlet-intro', get_string('introduction', 'teamwork'));
@@ -641,6 +644,6 @@ case teamwork::PHASE_CLOSED:
     }
     break;
 default:
-}
+}*/
 
 echo $output->footer();

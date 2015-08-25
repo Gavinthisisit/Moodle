@@ -591,3 +591,7 @@
 }
 
 .path-mod-teamwork .teamwork-risk-dataloss { vertical-align: text-bottom; }
+
+.path-mod-teamwork .div-inline {
+    display:inline
+}
