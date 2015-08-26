@@ -70,17 +70,20 @@ function teamwork_supports($feature) {
 function teamwork_add_instance(stdclass $teamwork) {
     global $CFG, $DB;
     require_once(dirname(__FILE__) . '/locallib.php');
-
-    $teamwork->phase                 = teamwork::PHASE_SETUP;
-    $teamwork->timecreated           = time();
-    $teamwork->timemodified          = $teamwork->timecreated;
-    $teamwork->useexamples           = (int)!empty($teamwork->useexamples);
-    $teamwork->usepeerassessment     = 1;
-    $teamwork->useselfassessment     = (int)!empty($teamwork->useselfassessment);
-    $teamwork->latesubmissions       = (int)!empty($teamwork->latesubmissions);
-    $teamwork->phaseswitchassessment = (int)!empty($teamwork->phaseswitchassessment);
-    $teamwork->evaluation            = 'best';
-
+/*
+	$new = new stdClass();
+	$new->course = $teamwork->course;
+	$new->name = $teamwork->name;
+	$new->intro = $teamwork->intro;
+	$new->introformat = $teamwork->introformat;
+	$new->strategy = $teamwork->strategy;
+	$new->gradedecimals = (int)$teamwork->gradedecimals;
+	$new->maxbytes = (int)$teamwork->maxbytes;
+	$new->displaysubmissions = (int)$teamwork->displaysubmissions;
+	$new->participationnumlimit = (int)$teamwork->participationnumlimit;
+	$new->applystart = $teamwork->applystart;
+	$new->applyend = $teamwork->applyend;
+*/
     // insert the new record so we get the id
     $teamwork->id = $DB->insert_record('teamwork', $teamwork);
 
@@ -88,28 +91,7 @@ function teamwork_add_instance(stdclass $teamwork) {
     $cmid = $teamwork->coursemodule;
     $DB->set_field('course_modules', 'instance', $teamwork->id, array('id' => $cmid));
     $context = context_module::instance($cmid);
-
-    // process the custom wysiwyg editors
-    if ($draftitemid = $teamwork->instructauthorseditor['itemid']) {
-        $teamwork->instructauthors = file_save_draft_area_files($draftitemid, $context->id, 'mod_teamwork', 'instructauthors',
-                0, teamwork::instruction_editors_options($context), $teamwork->instructauthorseditor['text']);
-        $teamwork->instructauthorsformat = $teamwork->instructauthorseditor['format'];
-    }
-
-    if ($draftitemid = $teamwork->instructreviewerseditor['itemid']) {
-        $teamwork->instructreviewers = file_save_draft_area_files($draftitemid, $context->id, 'mod_teamwork', 'instructreviewers',
-                0, teamwork::instruction_editors_options($context), $teamwork->instructreviewerseditor['text']);
-        $teamwork->instructreviewersformat = $teamwork->instructreviewerseditor['format'];
-    }
-
-    if ($draftitemid = $teamwork->conclusioneditor['itemid']) {
-        $teamwork->conclusion = file_save_draft_area_files($draftitemid, $context->id, 'mod_teamwork', 'conclusion',
-                0, teamwork::instruction_editors_options($context), $teamwork->conclusioneditor['text']);
-        $teamwork->conclusionformat = $teamwork->conclusioneditor['format'];
-    }
-
-    // re-save the record with the replaced URLs in editor fields
-    $DB->update_record('teamwork', $teamwork);
+    
 
     // create gradebook items
     teamwork_grade_item_update($teamwork);
@@ -1054,16 +1036,10 @@ function teamwork_grade_item_update(stdclass $teamwork, $submissiongrades=null, 
     $item = array();
     $item['itemname'] = get_string('gradeitemsubmission', 'teamwork', $a);
     $item['gradetype'] = GRADE_TYPE_VALUE;
-    $item['grademax']  = $teamwork->grade;
+    $item['grademax']  = 100;
     $item['grademin']  = 0;
     grade_update('mod/teamwork', $teamwork->course, 'mod', 'teamwork', $teamwork->id, 0, $submissiongrades , $item);
 
-    $item = array();
-    $item['itemname'] = get_string('gradeitemassessment', 'teamwork', $a);
-    $item['gradetype'] = GRADE_TYPE_VALUE;
-    $item['grademax']  = $teamwork->gradinggrade;
-    $item['grademin']  = 0;
-    grade_update('mod/teamwork', $teamwork->course, 'mod', 'teamwork', $teamwork->id, 1, $assessmentgrades, $item);
 }
 
 /**

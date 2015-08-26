@@ -79,31 +79,12 @@ class mod_teamwork_mod_form extends moodleform_mod {
 
         // Grading settings -----------------------------------------------------------
         $mform->addElement('header', 'gradingsettings', get_string('gradingsettings', 'teamwork'));
-        $mform->setExpanded('gradingsettings');
 
         $label = get_string('strategy', 'teamwork');
         $mform->addElement('select', 'strategy', $label, teamwork::available_strategies_list());
         $mform->setDefault('strategy', $teamworkconfig->strategy);
         $mform->addHelpButton('strategy', 'strategy', 'teamwork');
-
-        $grades = teamwork::available_maxgrades_list();
-        $gradecategories = grade_get_categories_menu($this->course->id);
-
-        $label = get_string('submissiongrade', 'teamwork');
-        $mform->addGroup(array(
-            $mform->createElement('select', 'grade', '', $grades),
-            $mform->createElement('select', 'gradecategory', '', $gradecategories),
-            ), 'submissiongradegroup', $label, ' ', false);
-        $mform->setDefault('grade', $teamworkconfig->grade);
-        $mform->addHelpButton('submissiongradegroup', 'submissiongrade', 'teamwork');
-
-        $label = get_string('gradinggrade', 'teamwork');
-        $mform->addGroup(array(
-            $mform->createElement('select', 'gradinggrade', '', $grades),
-            $mform->createElement('select', 'gradinggradecategory', '', $gradecategories),
-            ), 'gradinggradegroup', $label, ' ', false);
-        $mform->setDefault('gradinggrade', $teamworkconfig->gradinggrade);
-        $mform->addHelpButton('gradinggradegroup', 'gradinggrade', 'teamwork');
+        
 
         $options = array();
         for ($i=5; $i>=0; $i--) {
@@ -116,108 +97,37 @@ class mod_teamwork_mod_form extends moodleform_mod {
         // Submission settings --------------------------------------------------------
         $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'teamwork'));
 
-        $label = get_string('instructauthors', 'teamwork');
-        $mform->addElement('editor', 'instructauthorseditor', $label, null,
-                            teamwork::instruction_editors_options($this->context));
-
-        $options = array();
-        for ($i=7; $i>=0; $i--) {
-            $options[$i] = $i;
-        }
-        $label = get_string('nattachments', 'teamwork');
-        $mform->addElement('select', 'nattachments', $label, $options);
-        $mform->setDefault('nattachments', 1);
 
         $options = get_max_upload_sizes($CFG->maxbytes, $this->course->maxbytes, 0, $teamworkconfig->maxbytes);
         $mform->addElement('select', 'maxbytes', get_string('maxbytes', 'teamwork'), $options);
         $mform->setDefault('maxbytes', $teamworkconfig->maxbytes);
 
-        $label = get_string('latesubmissions', 'teamwork');
-        $text = get_string('latesubmissions_desc', 'teamwork');
-        $mform->addElement('checkbox', 'latesubmissions', $label, $text);
-        $mform->addHelpButton('latesubmissions', 'latesubmissions', 'teamwork');
+        $label = get_string('displaysubmissions', 'teamwork');
+        $mform->addElement('checkbox', 'displaysubmissions', $label);
 
-        // Assessment settings --------------------------------------------------------
-        $mform->addElement('header', 'assessmentsettings', get_string('assessmentsettings', 'teamwork'));
-
-        $label = get_string('instructreviewers', 'teamwork');
-        $mform->addElement('editor', 'instructreviewerseditor', $label, null,
-                            teamwork::instruction_editors_options($this->context));
-
-        $label = get_string('useselfassessment', 'teamwork');
-        $text = get_string('useselfassessment_desc', 'teamwork');
-        $mform->addElement('checkbox', 'useselfassessment', $label, $text);
-        $mform->addHelpButton('useselfassessment', 'useselfassessment', 'teamwork');
-
-        // Feedback -------------------------------------------------------------------
-        $mform->addElement('header', 'feedbacksettings', get_string('feedbacksettings', 'teamwork'));
-
-        $mform->addElement('select', 'overallfeedbackmode', get_string('overallfeedbackmode', 'mod_teamwork'), array(
-            0 => get_string('overallfeedbackmode_0', 'mod_teamwork'),
-            1 => get_string('overallfeedbackmode_1', 'mod_teamwork'),
-            2 => get_string('overallfeedbackmode_2', 'mod_teamwork')));
-        $mform->addHelpButton('overallfeedbackmode', 'overallfeedbackmode', 'mod_teamwork');
-        $mform->setDefault('overallfeedbackmode', 1);
-
-        $options = array();
-        for ($i = 7; $i >= 0; $i--) {
+        // Participation settings --------------------------------------------------------
+        $mform->addElement('header', 'participationsettings', get_string('participationsettings', 'teamwork'));
+				$options = array();
+        for ($i=1; $i<=10; $i++) {
             $options[$i] = $i;
         }
-        $mform->addElement('select', 'overallfeedbackfiles', get_string('overallfeedbackfiles', 'teamwork'), $options);
-        $mform->setDefault('overallfeedbackfiles', 0);
-        $mform->disabledIf('overallfeedbackfiles', 'overallfeedbackmode', 'eq', 0);
+				$mform->addElement('select', 'participationnumlimit', get_string('participationnumlimit', 'teamwork'), $options);
+        $mform->addHelpButton('participationnumlimit', 'participationnumlimit', 'teamwork');
 
-        $options = get_max_upload_sizes($CFG->maxbytes, $this->course->maxbytes);
-        $mform->addElement('select', 'overallfeedbackmaxbytes', get_string('overallfeedbackmaxbytes', 'teamwork'), $options);
-        $mform->setDefault('overallfeedbackmaxbytes', $teamworkconfig->maxbytes);
-        $mform->disabledIf('overallfeedbackmaxbytes', 'overallfeedbackmode', 'eq', 0);
-        $mform->disabledIf('overallfeedbackmaxbytes', 'overallfeedbackfiles', 'eq', 0);
 
-        $label = get_string('conclusion', 'teamwork');
-        $mform->addElement('editor', 'conclusioneditor', $label, null,
-                            teamwork::instruction_editors_options($this->context));
-        $mform->addHelpButton('conclusioneditor', 'conclusion', 'teamwork');
+        // Date settings---------------------------------------------------------------
+        $mform->addElement('header', 'datecontrol', get_string('datesettings', 'teamwork'));
 
-        // Example submissions --------------------------------------------------------
-        $mform->addElement('header', 'examplesubmissionssettings', get_string('examplesubmissions', 'teamwork'));
+        $label = get_string('applystart', 'teamwork');
+        $mform->addElement('date_time_selector', 'applystart', $label, array('optional' => false));
 
-        $label = get_string('useexamples', 'teamwork');
-        $text = get_string('useexamples_desc', 'teamwork');
-        $mform->addElement('checkbox', 'useexamples', $label, $text);
-        $mform->addHelpButton('useexamples', 'useexamples', 'teamwork');
+        $label = get_string('applyend', 'teamwork');
+        $mform->addElement('date_time_selector', 'applyend', $label, array('optional' => false));
 
-        $label = get_string('examplesmode', 'teamwork');
-        $options = teamwork::available_example_modes_list();
-        $mform->addElement('select', 'examplesmode', $label, $options);
-        $mform->setDefault('examplesmode', $teamworkconfig->examplesmode);
-        $mform->disabledIf('examplesmode', 'useexamples');
-
-        // Availability ---------------------------------------------------------------
-        $mform->addElement('header', 'accesscontrol', get_string('availability', 'core'));
-
-        $label = get_string('submissionstart', 'teamwork');
-        $mform->addElement('date_time_selector', 'submissionstart', $label, array('optional' => true));
-
-        $label = get_string('submissionend', 'teamwork');
-        $mform->addElement('date_time_selector', 'submissionend', $label, array('optional' => true));
-
-        $label = get_string('submissionendswitch', 'mod_teamwork');
-        $mform->addElement('checkbox', 'phaseswitchassessment', $label);
-        $mform->disabledIf('phaseswitchassessment', 'submissionend[enabled]');
-        $mform->addHelpButton('phaseswitchassessment', 'submissionendswitch', 'mod_teamwork');
-
-        $label = get_string('assessmentstart', 'teamwork');
-        $mform->addElement('date_time_selector', 'assessmentstart', $label, array('optional' => true));
-
-        $label = get_string('assessmentend', 'teamwork');
-        $mform->addElement('date_time_selector', 'assessmentend', $label, array('optional' => true));
-
-        $coursecontext = context_course::instance($this->course->id);
-        plagiarism_get_form_elements_module($mform, $coursecontext, 'mod_teamwork');
 
         // Common module settings, Restrict availability, Activity completion etc. ----
-        $features = array('groups' => true, 'groupings' => true,
-                'outcomes'=>true, 'gradecat'=>false, 'idnumber'=>false);
+        $this->_features = array('groups' => false, 'groupings' => false,
+                'outcomes'=>true, 'gradecat'=>false, 'idnumber'=>true);
 
         $this->standard_coursemodule_elements();
 
