@@ -275,6 +275,47 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Renders the templet list
+     *
+     * @param teamwork_templet_list $list prepared for the user
+     * @return string html code to be displayed
+     */
+    protected function render_teamwork_templet_list(teamwork_templet_list $list) {
+        $OUTPUT;
+
+        $output = '<div> <h2>现有项目</h2>';
+        $output .= html_writer::start_tag('div', array('class' => 'templet'));
+        if (! empty($list)) {
+            foreach ($list->container as $id => $templet) {
+                $output .= html_writer::start_tag('div');
+
+                $output .= html_writer::start_tag('div', array('class' => 'inline'));
+                $output .= html_writer::div($templet->title);
+                $output .= html_writer::div($templet->summary);
+                $output .= html_writer::end_tag('div');
+                
+                $output .= html_writer::start_tag('div', array('class' => 'inline'));
+                $tempform = new html_form();
+                //TODO: change the url and text.
+                $tempform->url = new moodle_url('http://domain.com/index.php');
+                $tempform->button->text = 'Join in';
+                $output .= $OUTPUT->button($tempform);
+                $output .= html_writer::end_tag('div');
+
+                $output .= html_writer::end_tag('div');
+                $content = html_writet::tag();
+            }
+            $output .= html_writer::end_tag('div');
+            
+        }
+        else {
+            ;
+        }
+        $output .= '</div>';
+        return $output;
+    }
+
+    /**
      * Renders the user plannner tool
      *
      * @param teamwork_user_plan $plan prepared for the user

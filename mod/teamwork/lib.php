@@ -1552,7 +1552,7 @@ function teamwork_extend_navigation(navigation_node $navref, stdclass $course, s
 
 /**
  * Extends the settings navigation with the Teamwork settings
-
+ *
  * This function is called when the context for the page is a teamwork module. This is not called by AJAX
  * so it is safe to rely on the $PAGE.
  *
