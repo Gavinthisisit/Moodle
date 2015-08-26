@@ -191,42 +191,6 @@ class mod_teamwork_mod_form extends moodleform_mod {
      */
     public function definition_after_data() {
 
-        $mform =& $this->_form;
-
-        if ($id = $mform->getElementValue('update')) {
-            $instance   = $mform->getElementValue('instance');
-
-            $gradeitems = grade_item::fetch_all(array(
-                'itemtype'      => 'mod',
-                'itemmodule'    => 'teamwork',
-                'iteminstance'  => $instance,
-                'courseid'      => $this->course->id));
-
-            if (!empty($gradeitems)) {
-                foreach ($gradeitems as $gradeitem) {
-                    // here comes really crappy way how to set the value of the fields
-                    // gradecategory and gradinggradecategory - grrr QuickForms
-                    if ($gradeitem->itemnumber == 0) {
-                        $group = $mform->getElement('submissiongradegroup');
-                        $elements = $group->getElements();
-                        foreach ($elements as $element) {
-                            if ($element->getName() == 'gradecategory') {
-                                $element->setValue($gradeitem->categoryid);
-                            }
-                        }
-                    } else if ($gradeitem->itemnumber == 1) {
-                        $group = $mform->getElement('gradinggradegroup');
-                        $elements = $group->getElements();
-                        foreach ($elements as $element) {
-                            if ($element->getName() == 'gradinggradecategory') {
-                                $element->setValue($gradeitem->categoryid);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         parent::definition_after_data();
     }
 
