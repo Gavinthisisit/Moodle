@@ -1541,11 +1541,11 @@ function teamwork_get_file_info($browser, $areas, $course, $cm, $context, $filea
  * @param cm_info $cm
  */
 function teamwork_extend_navigation(navigation_node $navref, stdclass $course, stdclass $module, cm_info $cm) {
-    global $CFG;
+    global $CFG,$DB,$USER;
 
-    if (has_capability('mod/teamwork:submit', context_module::instance($cm->id))) {
-        $url = new moodle_url('/mod/teamwork/submission.php', array('cmid' => $cm->id));
-        $mysubmission = $navref->add(get_string('mysubmission', 'teamwork'), $url);
+    if (has_capability('mod/teamwork:editsettings', context_module::instance($cm->id))) {
+        $url = new moodle_url('/course/modedit.php', array('update' => $cm->id));
+        $mysubmission = $navref->add(get_string('editsettings', 'teamwork'), $url);
         $mysubmission->mainnavonly = true;
     }
 }

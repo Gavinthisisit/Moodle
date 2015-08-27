@@ -179,13 +179,7 @@ $string['latesubmissions_desc'] = '允许在截止日期后提交作业';
 $string['latesubmissions_help'] = '如果启用，作者可以在截止日期后或在评估阶段提交作业。但不能编辑迟交的作业。';
 $string['maxbytes'] = '作业附件大小上限';
 $string['modulename'] = '团队协作';
-$string['modulename_help'] = '互相评价模块允许收集、查看以及评价学生的工作。
-
-学生可以提交任意电子文档（文件），比如文字处理文档或者电子表格，也可以利用文字编辑器直接在指定区域内输入文本。
-
-提交是以一个由教师定制的多准则标准来评估。同学间互评及对评估形式的理解可以提前通过由教师提供的示例提交和参考评价来进行练习。学生有一个或多个对其他同学的提交做出评价的机会。如果需要，提交和评论者可以是匿名的。
-
-在互相评测中学生获得两种分数 —— 一个是他们的提交分数，另一个是他们对其他学生的提交的评估分数。两种分数都会在成绩册中登记。';
+$string['modulename_help'] = '待添加';
 $string['modulenameplural'] = '团队协作';
 $string['mysubmission'] = '我的作业';
 $string['nattachments'] = '作业附件最大个数';
@@ -251,12 +245,7 @@ $string['sortasc'] = '升序排序';
 $string['sortdesc'] = '降序排序';
 $string['strategy'] = '评分策略';
 $string['strategyhaschanged'] = '在编辑表格期间，此团队协作的评分策略已被修改。';
-$string['strategy_help'] = '评分策略决定了使用哪个评价表格和给作业评分的方法。有4个选项：
-
-* 累加分数 - 针对指定的采分点给出评语和分数
-* 评语 - 针对指定的采分点给出评语，但是不评分
-* 错误数 - 针对指定的断言给出评语和“是/否”的评价
-* 量规 - 按照设定的标准给出分等级的评价';
+$string['strategy_help'] = '评分策略决定了使用哪个评价表格和给作业评分的方法。';
 $string['submission'] = '作业';
 $string['submissionattachment'] = '附件';
 $string['submissionby'] = '{$a} 的作业';
@@ -337,3 +326,4 @@ $string['teamwork:viewreviewernames'] = '查看评价人姓名';
 $string['yourassessment'] = '您的评价';
 $string['yourgrades'] = '您的成绩';
 $string['yoursubmission'] = '您的作业';
+$string['editsettings'] = '编辑设置';

@@ -334,3 +334,4 @@ $string['teamwork:viewreviewernames'] = 'View reviewer names';
 $string['yourassessment'] = 'Your assessment';
 $string['yourgrades'] = 'Your grades';
 $string['yoursubmission'] = 'Your submission';
+$string['editsettings'] = 'Edit Settings';

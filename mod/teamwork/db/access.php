@@ -25,7 +25,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-
+	
+	'mod/teamwork:editsettings' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
     // Ability to see that the teamwork exists, and the basic information
     // about it, for example the intro field
     'mod/teamwork:view' => array(
