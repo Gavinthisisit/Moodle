@@ -25,6 +25,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addproject'] = '添加一个新项目';
+$string['templetlist'] = '现有项目';
+$string['joininbutton'] = '加入该项目';
+$string['noprojects'] = '当前没有任何项目';
 $string['aggregategrades'] = '重新计算成绩';
 $string['aggregation'] = '成绩汇总';
 $string['allocate'] = '分配作业';

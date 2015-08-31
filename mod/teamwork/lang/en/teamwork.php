@@ -22,6 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['addproject'] = 'Add a new project';
+$string['templetlist'] = 'Projects';
+$string['joininbutton'] = 'Join In';
+$string['noprojects'] = 'There is no projects yet.';
 $string['aggregategrades'] = 'Re-calculate grades';
 $string['aggregation'] = 'Grades aggregation';
 $string['allocate'] = 'Allocate submissions';

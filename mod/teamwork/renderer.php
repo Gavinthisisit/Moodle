@@ -282,11 +282,11 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list(teamwork_templet_list $list) {
-        $OUTPUT;
 
-        $output = '<div> <h2>现有项目</h2>';
+        $output = '';
+        $output .= html_writer::start_tag('div', array('class' => 'content'));
+        $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
-        //var_dump($list); die;
         if (! empty($list->container)) {
             foreach ($list->container as $id => $templet) {
                 $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
@@ -297,7 +297,8 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
                 //TODO link button to joinin.php
-                $output .= $this->single_button('sdf', "sdsd", POST);
+                $btn_str = get_string('joininbutton', 'teamwork');
+                $output .= $this->single_button('sdf', $btn_str, POST);
                 $output .= html_writer::end_tag('div');
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));
@@ -306,30 +307,23 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('div'); // .summary
                 $output .= html_writer::end_tag('div'); // .content
                 $output .= html_writer::end_tag('div'); // .coursebox
-
-                //$output .= html_writer::end_tag('div');
-                //$output .= html_writer::div($templet->summary);
-                //$output .= html_writer::end_tag('div');
-                
-                //$output .= html_writer::start_tag('div', array('class' => 'div-inline'));
-                //$tempform = new html_form();
-                //TODO: change the url and text.
-                //$tempform->url = new moodle_url('http://domain.com/index.php');
-                //$tempform->button->text = 'Join in';
-                //$output .= $OUTPUT->button($tempform);
-                //$output .= 'asdfjoasd';
-                //$output .= html_writer::end_tag('div');
-
-                //$output .= html_writer::end_tag('div');
-             //   $content = html_writet::tag();
             }
-            $output .= html_writer::end_tag('div');
-            
         }
         else {
-            ;
+            $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
+            $output .= html_writer::start_tag('div', array('class' => 'content'));
+            $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+            $output .= get_string('noprojects', 'teamwork');
+            $output .= html_writer::end_tag('div'); // .summary
+            $output .= html_writer::end_tag('div'); // .content
+            $output .= html_writer::end_tag('div'); // .coursebox
         }
-        $output .= '</div>';
+        $output .= html_writer::start_tag('div', array('class' => 'buttons'));
+        $add_btn = get_string('addproject', 'teamwork');
+        //TODO link button to create a project
+        $output .= $this->single_button('sdf', $add_btn, POST);
+        $output .= html_writer::end_tag('div');
+        $output .= html_writer::end_tag('div');
         return $output;
     }
 
