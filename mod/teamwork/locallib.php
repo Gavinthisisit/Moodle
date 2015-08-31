@@ -2787,6 +2787,9 @@ class teamwork {
  *
  * Templets list contains several templets. Each templet contains templet header, templet introduce, and a "join in"
  * button.
+ *
+ * @author skyxuan
+ * @see teamwork_renderer::render_teamwork_templet_list
  */
 
 class teamwork_templet_list implements renderable {
@@ -2801,11 +2804,11 @@ class teamwork_templet_list implements renderable {
      * @param teamwork $teamwork instance
      */
     public function __construct(teamwork $teamwork) {
-        //global $DB;
+        global $DB;
         // TODO
         $this->teamwork = $teamwork->id;
 
-        //$this->container = $DB->get_record_list('teamwork_templet', 'teamwork', array($this->teamwork));
+        $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
     }
 }
 

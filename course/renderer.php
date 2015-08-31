@@ -1625,10 +1625,10 @@ class core_course_renderer extends plugin_renderer_base {
      */
     protected function coursecat_tree(coursecat_helper $chelper, $coursecat) {
         $categorycontent = $this->coursecat_category_content($chelper, $coursecat, 0);
+        //var_dump($categorycontent);die;
         if (empty($categorycontent)) {
             return '';
         }
-
         // Start content generation
         $content = '';
         $attributes = $chelper->get_and_erase_attributes('course_category_tree clearfix');
@@ -1926,7 +1926,7 @@ class core_course_renderer extends plugin_renderer_base {
      * Returns HTML to display one remote course
      *
      * @param stdClass $course remote course information, contains properties:
-           id, remoteid, shortname, fullname, hostid, summary, summaryformat, cat_name, hostname
+     *      id, remoteid, shortname, fullname, hostid, summary, summaryformat, cat_name, hostname
      * @return string
      */
     protected function frontpage_remote_course(stdClass $course) {

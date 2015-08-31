@@ -277,6 +277,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     /**
      * Renders the templet list
      *
+     * @author skyxuan
      * @param teamwork_templet_list $list prepared for the user
      * @return string html code to be displayed
      */
@@ -285,25 +286,42 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 
         $output = '<div> <h2>现有项目</h2>';
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
-        if (! empty($list)) {
+        //var_dump($list); die;
+        if (! empty($list->container)) {
             foreach ($list->container as $id => $templet) {
-                $output .= html_writer::start_tag('div');
-
-                $output .= html_writer::start_tag('div', array('class' => 'inline'));
-                $output .= html_writer::div($templet->title);
-                $output .= html_writer::div($templet->summary);
+                $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
+                $output .= html_writer::start_tag('div', array('class' => 'info'));
+                $output .= html_writer::start_tag('h3', array('class' => 'coursename'));
+                $output .= $templet->title;
+                $output .= html_writer::end_tag('h3'); // .name
+                $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
+                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+                //TODO link button to joinin.php
+                $output .= $this->single_button('sdf', "sdsd", POST);
                 $output .= html_writer::end_tag('div');
+                $output .= html_writer::end_tag('div'); // .info
+                $output .= html_writer::start_tag('div', array('class' => 'content'));
+                $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+                $output .= $templet->summary;
+                $output .= html_writer::end_tag('div'); // .summary
+                $output .= html_writer::end_tag('div'); // .content
+                $output .= html_writer::end_tag('div'); // .coursebox
+
+                //$output .= html_writer::end_tag('div');
+                //$output .= html_writer::div($templet->summary);
+                //$output .= html_writer::end_tag('div');
                 
-                $output .= html_writer::start_tag('div', array('class' => 'inline'));
-                $tempform = new html_form();
+                //$output .= html_writer::start_tag('div', array('class' => 'div-inline'));
+                //$tempform = new html_form();
                 //TODO: change the url and text.
-                $tempform->url = new moodle_url('http://domain.com/index.php');
-                $tempform->button->text = 'Join in';
-                $output .= $OUTPUT->button($tempform);
-                $output .= html_writer::end_tag('div');
+                //$tempform->url = new moodle_url('http://domain.com/index.php');
+                //$tempform->button->text = 'Join in';
+                //$output .= $OUTPUT->button($tempform);
+                //$output .= 'asdfjoasd';
+                //$output .= html_writer::end_tag('div');
 
-                $output .= html_writer::end_tag('div');
-                $content = html_writet::tag();
+                //$output .= html_writer::end_tag('div');
+             //   $content = html_writet::tag();
             }
             $output .= html_writer::end_tag('div');
             

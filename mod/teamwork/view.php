@@ -107,9 +107,10 @@ $userplan = new teamwork_user_plan($teamwork, $USER->id);
 
 echo $output->header();
 //echo $output->heading_with_help(format_string($teamwork->name), 'userplan', 'teamwork');
-//echo var_dump($teamwork);
-//die();
+
 $renderable = new teamwork_templet_list($teamwork);
+//var_dump($renderable);
+//die();
 echo $output->render($renderable);
 //echo $output->render($userplan);
 /*switch ($teamwork->phase) {
