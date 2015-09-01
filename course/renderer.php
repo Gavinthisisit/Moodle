@@ -978,7 +978,7 @@ class core_course_renderer extends plugin_renderer_base {
 
         // Display the link to the module (or do nothing if module has no url)
         $cmname = $this->course_section_cm_name($mod, $displayoptions);
-
+        
         if (!empty($cmname)) {
             // Start the div for the activity title, excluding the edit icons.
             $output .= html_writer::start_tag('div', array('class' => 'activityinstance'));

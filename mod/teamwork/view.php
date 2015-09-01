@@ -38,6 +38,7 @@ $perpage    = optional_param('perpage', null, PARAM_INT);
 $sortby     = optional_param('sortby', 'lastname', PARAM_ALPHA);
 $sorthow    = optional_param('sorthow', 'ASC', PARAM_ALPHA);
 $eval       = optional_param('eval', null, PARAM_PLUGIN);
+$templetid  = optional_param('templetid', 0, PARAM_INT);
 
 if ($id) {
     $cm             = get_coursemodule_from_id('teamwork', $id, 0, false, MUST_EXIST);
@@ -107,10 +108,14 @@ $userplan = new teamwork_user_plan($teamwork, $USER->id);
 
 echo $output->header();
 //echo $output->heading_with_help(format_string($teamwork->name), 'userplan', 'teamwork');
-
-$renderable = new teamwork_templet_list($teamwork);
-//var_dump($renderable);
-//die();
+$teammember_record = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id));
+//var_dump($USER); die;
+if (isset($teammember_record->userid)) {
+   $renderable = new teamwork_templet_list_member($teamwork->id, $PAGE->url);
+}
+else {
+    $renderable = new teamwork_templet_list($teamwork->id, $PAGE->url); 
+}
 echo $output->render($renderable);
 //echo $output->render($userplan);
 /*switch ($teamwork->phase) {

@@ -2783,7 +2783,7 @@ class teamwork {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Overview of templets list
+ * Overview of templets list when user hasn't join in any team
  *
  * Templets list contains several templets. Each templet contains templet header, templet introduce, and a "join in"
  * button.
@@ -2797,17 +2797,49 @@ class teamwork_templet_list implements renderable {
     public $teamwork;
     /** @var array of (stdclass)templets*/
     public $container = array();
+    /** @var moodle_url */
+    public $url;
 
     /**
      * Prepare an tasks list for the given teamwork moudle.
      *
      * @param teamwork $teamwork instance
      */
-    public function __construct(teamwork $teamwork) {
+    public function __construct($teamwork, moodle_url $url) {
         global $DB;
-        // TODO
-        $this->teamwork = $teamwork->id;
+        $this->teamwork = $teamwork;
+        $this->url = $url;
+        $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
+    }
+}
 
+/**
+ * Overview of templets list when user is a team member
+ *
+ * Templets list contains several templets. Each templet contains templet header, templet introduce,
+ * and a disabled button.
+ *
+ * @author skyxuan
+ * @see teamwork_renderer::render_teamwork_templet_list_member
+ */
+
+class teamwork_templet_list_member implements renderable {
+    /** @var teamwork */
+    public $teamwork;
+    /** @var array of (stdclass)templets*/
+    public $container = array();
+    /** @var moodle_url */
+    public $url;
+
+    /**
+     * Prepare an tasks list for the given teamwork moudle.
+     *
+     * @param teamwork $teamwork instance
+     */
+    public function __construct($teamwork, moodle_url $url) {
+        global $DB;
+        $this->teamwork = $teamwork;
+        $this->url = $url;
         $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
     }
 }

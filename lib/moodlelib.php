@@ -626,7 +626,6 @@ function optional_param($parname, $default, $type) {
     if (!isset($default)) {
         $default = null;
     }
-
     // POST has precedence.
     if (isset($_POST[$parname])) {
         $param = $_POST[$parname];
