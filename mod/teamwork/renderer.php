@@ -324,7 +324,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $output .= html_writer::start_tag('div', array('class' => 'buttons'));
         $add_btn = get_string('addproject', 'teamwork');
         //TODO link button to create a project
-        $output .= $this->single_button('sdf', $add_btn, 'post');
+        $output .= $this->single_button("templet_edit.php?id=$list->teamwork", $add_btn, 'post');
         $output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
         return $output;
