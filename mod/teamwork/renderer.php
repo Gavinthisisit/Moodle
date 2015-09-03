@@ -286,7 +286,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
-        //var_dump($list->url);
         if (! empty($list->container)) {
             foreach ($list->container as $id => $templet) {
                 $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
@@ -321,11 +320,30 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $output .= html_writer::end_tag('div'); // .content
             $output .= html_writer::end_tag('div'); // .coursebox
         }
-        $output .= html_writer::start_tag('div', array('class' => 'buttons'));
-        $add_btn = get_string('addproject', 'teamwork');
-        //TODO link button to create a project
-        $output .= $this->single_button("templet_edit.php?id=$list->teamwork", $add_btn, 'post');
         $output .= html_writer::end_tag('div');
+        $output .= html_writer::end_tag('div');
+        return $output;
+    }
+
+    /**
+     * Renders the templet control buttons
+     *
+     * @author skyxuan
+     * @param teamwork_templet_buttons $conf prepared for the user
+     * @return string html code to be displayed
+     */
+    protected function render_teamwork_templet_buttons(teamwork_templet_buttons $conf) {
+        $output = '';
+        $output .= html_writer::start_tag('div', array('class' => 'buttons'));
+        //var_dump($conf); die;
+        if ($conf->create_templet) {
+            $add_btn = get_string('addproject', 'teamwork');
+            $output .= $this->single_button("templet_edit.php?id=$conf->teamwork", $add_btn, 'post');
+        }
+        if ($conf->edit_team_info) {
+            $edit_btn = get_string('editteaminfo', 'teamwork');
+            $output .= $this->single_button("sdf", $edit_btn, 'post');
+        }
         $output .= html_writer::end_tag('div');
         return $output;
     }
@@ -377,10 +395,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $output .= html_writer::end_tag('div'); // .content
             $output .= html_writer::end_tag('div'); // .coursebox
         }
-        $output .= html_writer::start_tag('div', array('class' => 'buttons'));
-        $add_btn = get_string('addproject', 'teamwork');
-        //TODO link button to create a project
-        $output .= $this->single_button('sdf', $add_btn, 'post');
         $output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
         return $output;
