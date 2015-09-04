@@ -107,16 +107,34 @@ $userplan = new teamwork_user_plan($teamwork, $USER->id);
 /// Output starts here
 
 echo $output->header();
-//echo $output->heading_with_help(format_string($teamwork->name), 'userplan', 'teamwork');
-$teammember_record = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id));
-//var_dump($USER); die;
-if (isset($teammember_record->userid)) {
+
+//display templet list
+$teammember_records = $DB->get_records('teamwork_teammembers', array('userid' => $USER->id, 'teamwork' => $teamwork->id));
+$is_team_leader = false;
+$leading_team = null;
+foreach ($teammember_records as $recordid => $record) {
+    if ($record->leader) {
+        $is_team_leader = true;
+        $leading_team = $record->team;
+    }
+}
+//var_dump($teamwork); var_dump($teamwork->participationnumlimit); var_dump($is_team_leader);die;
+if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
    $renderable = new teamwork_templet_list_member($teamwork->id, $PAGE->url);
 }
 else {
     $renderable = new teamwork_templet_list($teamwork->id, $PAGE->url); 
 }
 echo $output->render($renderable);
+
+//display control buttons
+if (has_capability('mod/teamwork:editsettings', $PAGE->context)) {
+    $can_add_templet = true;
+}
+
+$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_add_templet, $is_team_leader);
+echo $output->render($renderable);
+
 //echo $output->render($userplan);
 /*switch ($teamwork->phase) {
 case teamwork::PHASE_SETUP:

@@ -2793,9 +2793,9 @@ class teamwork {
  */
 
 class teamwork_templet_list implements renderable {
-    /** @var teamwork */
+    /** @var int reamworkid */
     public $teamwork;
-    /** @var array of (stdclass)templets*/
+    /** @var array of (stdclass)templets */
     public $container = array();
     /** @var moodle_url */
     public $url;
@@ -2824,7 +2824,7 @@ class teamwork_templet_list implements renderable {
  */
 
 class teamwork_templet_list_member implements renderable {
-    /** @var teamwork */
+    /** @var int teamworkid */
     public $teamwork;
     /** @var array of (stdclass)templets*/
     public $container = array();
@@ -2834,7 +2834,8 @@ class teamwork_templet_list_member implements renderable {
     /**
      * Prepare an tasks list for the given teamwork moudle.
      *
-     * @param teamwork $teamwork instance
+     * @param int $teamwork
+     * @param moodle_url $url
      */
     public function __construct($teamwork, moodle_url $url) {
         global $DB;
@@ -2843,6 +2844,41 @@ class teamwork_templet_list_member implements renderable {
         $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
     }
 }
+
+/**
+ * Some control buttons
+ *
+ * Templets butons contains two buttonss. add new templet button and edit team button.
+ *
+ * @author skyxuan
+ * @see teamwork_renderer::render_teamwork_templet_buttons
+ */
+class teamwork_templet_buttons implements renderable {
+    /** @var int teamworkid */
+    public $teamwork;
+    /** @var int teamid */
+    public $teamid;
+    /** @var bool capability of create templets*/
+    public $create_templet;
+    /** @var bool capability of edit team info*/
+    public $edit_team_info;
+
+    /**
+     * Prepare a buttons view for the given messages.
+     *
+     * @param int $teamwork
+     * @param int $reamid
+     * @param bool $create_templet
+     * @param bool $edit_team_info 
+     */
+    public function __construct($teamwork, $teamid, $create_templet, $edit_team_info) {
+        $this->teamwork = $teamwork;
+        $this->teamid = $teamid;
+        $this->create_templet = $create_templet;
+        $this->edit_team_info = $edit_team_info;
+    }
+}
+
 
 /**
  * Represents the user planner tool

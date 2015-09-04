@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['editteaminfo'] = 'Manage my team';
 $string['addproject'] = 'Add a new project';
 $string['templetlist'] = 'Projects';
 $string['joininbutton'] = 'Join In';
