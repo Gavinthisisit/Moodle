@@ -24,6 +24,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+$string['teamtitle'] = '团队名称';
+$string['createteam'] = '创建团队';
 $string['editteaminfo'] = '管理我的团队';
 $string['addproject'] = '添加一个新项目';
 $string['templetlist'] = '现有项目';

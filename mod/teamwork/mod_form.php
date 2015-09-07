@@ -84,7 +84,7 @@ class mod_teamwork_mod_form extends moodleform_mod {
         $mform->addElement('select', 'strategy', $label, teamwork::available_strategies_list());
         $mform->setDefault('strategy', $teamworkconfig->strategy);
         $mform->addHelpButton('strategy', 'strategy', 'teamwork');
-        
+
 
         $options = array();
         for ($i=5; $i>=0; $i--) {
@@ -247,8 +247,8 @@ class teamwork_templet_form extends moodleform {
     	$this->phasenum = optional_param('phasenum', 0, PARAM_INT);
     	$phaseadd = optional_param('phaseadd', '', PARAM_TEXT);
     	if($phaseadd){
-    		$this->phasenum++;	
-    	}    	
+    		$this->phasenum++;
+    	}
         parent::__construct();
     }
 
@@ -291,18 +291,18 @@ class teamwork_templet_form extends moodleform {
         }
         $mform->addElement('select', 'teamminmembers', get_string('teamminmembers', 'teamwork'), $options);
 		$mform->addElement('select', 'teammaxmembers', get_string('teammaxmembers', 'teamwork'), $options);
-		
+
 		for ($i=1; $i<=10; $i++) {
             $options[$i] = $i;
         }
         $mform->addElement('select', 'teamlimit', get_string('teamlimit', 'teamwork'), $options);
 		$mform->addHelpButton('teamlimit', 'teamlimit', 'teamwork');
-		
+
 		// Submission settings --------------------------------------------------------
         $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'teamwork'));
 		$label = get_string('displaysubmissions', 'teamwork');
         $mform->addElement('checkbox', 'displaysubmissions', $label);
-        
+
         // Assessment settings---------------------------------------------------------------
         $mform->addElement('header', 'assessmentsettings', get_string('assessmentsettings', 'teamwork'));
 		$label = get_string('assessmentanonymous', 'teamwork');
@@ -320,10 +320,10 @@ class teamwork_templet_form extends moodleform {
 
 		// Phase settings---------------------------------------------------------------
         $mform->addElement('header', 'phasesettings', get_string('phasesettings', 'teamwork'));
-		
+
         $mform->registerNoSubmitButton('phaseadd');
         $mform->addElement('submit', 'phaseadd', get_string('phaseadd', 'teamwork'));
-        
+
         for($i=1;$i<=$this->phasenum;$i++){
 			$mform->addElement('header', 'phase_'.$i, get_string('phasenumber', 'teamwork', $i));
 			$mform->addElement('text', 'phasename_'.$i, get_string('phasename', 'teamwork'));
@@ -340,7 +340,7 @@ class teamwork_templet_form extends moodleform {
 			$mform->addElement('date_time_selector', 'phasestart_'.$i, get_string('phasestart', 'teamwork'),array('optional' => false));
 			$mform->addElement('date_time_selector', 'phaseend_'.$i, get_string('phaseend', 'teamwork'),array('optional' => false));
 		}
-		
+
 		//Hidden------------------------------------------------------------------------
         $mform->addElement('hidden', 'id', $this->teamworkid);
         $mform->setType('id', PARAM_INT);
@@ -422,5 +422,63 @@ class teamwork_templet_form extends moodleform {
         $errors = array();
 
         return $errors;
+    }
+}
+
+/**
+ * teamwork info setting form
+ */
+class teamwork_teaminfo_form extends moodleform {
+
+    protected $course = 0;
+    protected $teamwork = 0;
+    protected $templet = 0;
+    
+    /**
+     * Constructor
+     */
+    public function __construct($course, $teamwork, $templet) {
+        $this->course = $course;
+        $this->teamwork = $teamwork;
+        $this->templet = $templet;
+        parent::__construct();
+    }
+
+    //Add elements to form
+    public function definition() {
+        global $CFG;
+ 
+        $mform = $this->_form;
+
+        // General --------------------------------------------------------------------
+        $mform->addElement('header', 'general', get_string('general', 'form'));
+
+        // team title
+        $label = get_string('teamtitle', 'teamwork');
+        $mform->addElement('text', 'title', $label, array('size'=>'64'));
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('title', PARAM_TEXT);
+        } else {
+            $mform->setType('title', PARAM_CLEANHTML);
+        }
+        $mform->addRule('title', null, 'required', null, 'client');
+        $mform->addRule('title', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+
+        //Hidden------------------------------------------------------------------------
+        $mform->addElement('hidden', 'courseid', $this->course);
+        $mform->setType('courseid', PARAM_INT);
+        $mform->addElement('hidden', 'teamworkid', $this->teamwork);
+        $mform->setType('teamworkid', PARAM_INT);
+        $mform->addElement('hidden', 'templetid', $this->templet);
+        $mform->setType('templetid', PARAM_INT);
+        //TODO
+        $mform->addElement('hidden', 'time', 12345);
+        $mform->setType('time', PARAM_INT);
+        // Standard buttons, common to all modules ------------------------------------
+        $this->add_action_buttons();
+    }
+    //Custom validation should be added here
+    function validation($data, $files) {
+        return array();
     }
 }

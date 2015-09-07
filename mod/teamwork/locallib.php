@@ -2797,18 +2797,15 @@ class teamwork_templet_list implements renderable {
     public $teamwork;
     /** @var array of (stdclass)templets */
     public $container = array();
-    /** @var moodle_url */
-    public $url;
 
     /**
      * Prepare an tasks list for the given teamwork moudle.
      *
      * @param teamwork $teamwork instance
      */
-    public function __construct($teamwork, moodle_url $url) {
+    public function __construct($teamwork) {
         global $DB;
         $this->teamwork = $teamwork;
-        $this->url = $url;
         $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
     }
 }
@@ -2828,8 +2825,6 @@ class teamwork_templet_list_member implements renderable {
     public $teamwork;
     /** @var array of (stdclass)templets*/
     public $container = array();
-    /** @var moodle_url */
-    public $url;
 
     /**
      * Prepare an tasks list for the given teamwork moudle.
@@ -2837,10 +2832,9 @@ class teamwork_templet_list_member implements renderable {
      * @param int $teamwork
      * @param moodle_url $url
      */
-    public function __construct($teamwork, moodle_url $url) {
+    public function __construct($teamwork) {
         global $DB;
         $this->teamwork = $teamwork;
-        $this->url = $url;
         $this->container = $DB->get_records_list('teamwork_templet', 'teamwork', array($this->teamwork));
     }
 }

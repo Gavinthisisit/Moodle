@@ -120,10 +120,10 @@ foreach ($teammember_records as $recordid => $record) {
 }
 //var_dump($teamwork); var_dump($teamwork->participationnumlimit); var_dump($is_team_leader);die;
 if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
-   $renderable = new teamwork_templet_list_member($teamwork->id, $PAGE->url);
+   $renderable = new teamwork_templet_list_member($teamwork->id);
 }
 else {
-    $renderable = new teamwork_templet_list($teamwork->id, $PAGE->url); 
+    $renderable = new teamwork_templet_list($teamwork->id); 
 }
 echo $output->render($renderable);
 

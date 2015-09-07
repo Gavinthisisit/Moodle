@@ -21,7 +21,8 @@
  * @copyright  2009 David Mudrak <david@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+$string['createteam'] = 'Create a Team';
+$string['teamtitle'] = 'Team Name';
 $string['editteaminfo'] = 'Manage my team';
 $string['addproject'] = 'Add a new project';
 $string['templetlist'] = 'Projects';

@@ -282,6 +282,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list(teamwork_templet_list $list) {
+        global $DB;
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
@@ -297,10 +298,14 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
                 //TODO link button to joinin.php
                 $std_btn = new stdClass();
-                $std_btn->url = new moodle_url($list->url,array('templetid' => $templet->id));
+                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
                 $std_btn->str = get_string('joininbutton', 'teamwork');
                 $std_btn->method = 'post';
-                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method);
+                $std_btn->actions = array();
+                if (count($DB->get_records('teamwork_team', array('templet' => $templet->id))) >= $templet->teamlimit) {
+                    $std_btn->actions['disabled'] = true;
+                }
+                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, $std_btn->actions);
                 $output .= html_writer::end_tag('div');
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));
@@ -372,7 +377,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
                 //TODO link button to joinin.php
                 $std_btn = new stdClass();
-                $std_btn->url = new moodle_url($list->url,array('templetid' => $templet->id));
+                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
                 $std_btn->str = get_string('joininbutton', 'teamwork');
                 $std_btn->method = 'post';
                 $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, array('disabled' => true));
