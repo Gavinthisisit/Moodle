@@ -84,6 +84,18 @@ function save_templet_data($course,$data){
 	$newtemplet->scoremax = (int)$data->scoremax;
 	$newtemplet->anonymous = (int)$data->assessmentanonymous;
 	$newtemplet->assessfirst = (int)$data->assessfirst;
-	$DB->insert_record('teamwork_templet',$newtemplet);
+	$templetid = $DB->insert_record('teamwork_templet',$newtemplet);
+	for($i=1;$i<=$data->phasenum;$i++){
+		$newphase = new stdClass();
+		$newphase->course = $course->id;
+		$newphase->teamwork = $data->id;
+		$newphase->templet =  $templetid;
+		$newphase->orderid = $i;
+		$newphase->name = $data->{'phasename_'.$i};
+		$newphase->description = $data->{'phasedescription_'.$i}['text'];
+		$newphase->timestart = $data->{'phasestart_'.$i};
+		$newphase->timeend = $data->{'phaseend_'.$i};
+		$DB->insert_record('teamwork_templet_phase',$newphase);
+	}
 	
 }
