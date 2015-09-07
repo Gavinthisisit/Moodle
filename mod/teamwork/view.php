@@ -118,8 +118,18 @@ foreach ($teammember_records as $recordid => $record) {
         $leading_team = $record->team;
     }
 }
-//var_dump($teamwork); var_dump($teamwork->participationnumlimit); var_dump($is_team_leader);die;
-if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
+
+if (has_capability('mod/teamwork:editsettings', $PAGE->context)) {
+    $can_edit_templet = true;
+}
+else {
+    $can_edit_templet = false;
+}
+
+if ($can_edit_templet) {
+    $renderable = new teamwork_templet_list_manager($teamwork->id);
+}
+else if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
    $renderable = new teamwork_templet_list_member($teamwork->id);
 }
 else {
@@ -128,11 +138,7 @@ else {
 echo $output->render($renderable);
 
 //display control buttons
-if (has_capability('mod/teamwork:editsettings', $PAGE->context)) {
-    $can_add_templet = true;
-}
-
-$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_add_templet, $is_team_leader);
+$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader);
 echo $output->render($renderable);
 
 //echo $output->render($userplan);
