@@ -74,7 +74,6 @@ if(!empty($update)){
 		$savedata->{'phaseend_'.$i} = $data->timeend;
 	}
 	
-	var_dump($savedata);die;
 	$mform->set_data($savedata);
 }else{
 	$mform = new teamwork_templet_form($id);	
