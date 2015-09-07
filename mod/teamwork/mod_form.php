@@ -237,17 +237,22 @@ class mod_teamwork_mod_form extends moodleform_mod {
  */
 class teamwork_templet_form extends moodleform {
 
-	protected $teamworkid = null;
+	protected $teamworkid = 0;
+	protected $templetid = 0;
 	protected $phasenum = 0;
     /**
      * Constructor
      */
-    public function __construct($id) {
-    	$this->teamworkid = $id;
-    	$this->phasenum = optional_param('phasenum', 0, PARAM_INT);
+    public function __construct($teamworkid,$templetid=0,$phasenum=0) {
+    	$this->teamworkid = $teamworkid;
+    	$this->templetid = $templetid;
+    	$this->phasenum = $phasenum==0 ? optional_param('phasenum', 0, PARAM_INT):$phasenum;
     	$phaseadd = optional_param('phaseadd', '', PARAM_TEXT);
     	if($phaseadd){
     		$this->phasenum++;
+    	}
+
+    		$this->phasenum++;	
     	}
         parent::__construct();
     }
@@ -342,7 +347,9 @@ class teamwork_templet_form extends moodleform {
 		}
 
 		//Hidden------------------------------------------------------------------------
-        $mform->addElement('hidden', 'id', $this->teamworkid);
+        $mform->addElement('hidden', 'id', $this->teamworkid);   
+        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'templetid', $this->templetid);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'phasenum', $this->phasenum);
         $mform->setType('phasenum', PARAM_INT);

@@ -47,8 +47,38 @@ $PAGE->set_title($teamwork->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('editingprojectsettings', 'teamwork'));
 
+$mform = null;
 
-$mform = new teamwork_templet_form($id);
+if(!empty($update)){
+	$data = $DB->get_record('teamwork_templet', array('id' => $update), '*', MUST_EXIST);
+	$mform = new teamwork_templet_form($id,$update,$data->phase);
+	$savedata = new stdClass();
+	$savedata->title = $data->title;
+	$savedata->summary['text'] = $data->summary;
+	$savedata->teamminmembers = $data->teamminmember;
+	$savedata->teammaxmembers = $data->teammaxmember;
+	$savedata->teamlimit = $data->teamlimit;
+	$savedata->role = $data->role;
+	$savedata->phasenum = $data->phase;
+	$savedata->displaysubmissions = $data->display;
+	$savedata->scoremin = $data->scoremin;
+	$savedata->scoremax = $data->scoremax;
+	$savedata->assessmentanonymous = $data->anonymous;
+	$savedata->assessfirst = $data->assessfirst;
+	
+	for($i=1;$i<=$data->phase;$i++){
+		$data = $DB->get_record('teamwork_templet_phase', array('teamwork' => $id,'templet' => $update,'orderid' => $i), '*', MUST_EXIST);
+		$savedata->{'phasename_'.$i} = $data->name;
+		$savedata->{'phasedescription_'.$i}['text'] = $data->description;
+		$savedata->{'phasestart_'.$i} = $data->timestart;
+		$savedata->{'phaseend_'.$i} = $data->timeend;
+	}
+	
+	
+	$mform->set_data($savedata);
+}else{
+	$mform = new teamwork_templet_form($id);	
+}
 
 
 if ($mform->is_cancelled()) {
@@ -84,6 +114,33 @@ function save_templet_data($course,$data){
 	$newtemplet->scoremax = (int)$data->scoremax;
 	$newtemplet->anonymous = (int)$data->assessmentanonymous;
 	$newtemplet->assessfirst = (int)$data->assessfirst;
-	$DB->insert_record('teamwork_templet',$newtemplet);
+	if($data->templetid!=0){
+		$update = $data->templetid;
+		$newtemplet->id = $update;
+		$DB->update_record('teamwork_templet',$newtemplet);
+		$templetid = $update;
+	}else{
+		$templetid = $DB->insert_record('teamwork_templet',$newtemplet);
+	}
+		
+	
+	for($i=1;$i<=$data->phasenum;$i++){
+		$newphase = new stdClass();
+		$newphase->course = $course->id;
+		$newphase->teamwork = $data->id;
+		$newphase->templet =  $templetid;
+		$newphase->orderid = $i;
+		$newphase->name = $data->{'phasename_'.$i};
+		$newphase->description = $data->{'phasedescription_'.$i}['text'];
+		$newphase->timestart = $data->{'phasestart_'.$i};
+		$newphase->timeend = $data->{'phaseend_'.$i};
+		$record = $DB->get_record('teamwork_templet_phase',array('templet'=>$templetid,'orderid'=>$i));
+		if(!empty($record)){
+			$newphase->id = $record->id;
+			$DB->update_record('teamwork_templet_phase',$newphase);
+		}else{
+			$DB->insert_record('teamwork_templet_phase',$newphase);
+		}
+	}
 	
 }
