@@ -66,7 +66,7 @@ if(!empty($update)){
 	$savedata->assessmentanonymous = $data->anonymous;
 	$savedata->assessfirst = $data->assessfirst;
 	
-	for($i=1;$i<=$data->phase;$i++){
+	for($i=1;$i <= (int)$savedata->phasenum;$i++){
 		$data = $DB->get_record('teamwork_templet_phase', array('teamwork' => $id,'templet' => $update,'orderid' => $i), '*', MUST_EXIST);
 		$savedata->{'phasename_'.$i} = $data->name;
 		$savedata->{'phasedescription_'.$i}['text'] = $data->description;
@@ -74,7 +74,7 @@ if(!empty($update)){
 		$savedata->{'phaseend_'.$i} = $data->timeend;
 	}
 	
-	
+	var_dump($savedata);die;
 	$mform->set_data($savedata);
 }else{
 	$mform = new teamwork_templet_form($id);	

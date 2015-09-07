@@ -251,9 +251,6 @@ class teamwork_templet_form extends moodleform {
     	if($phaseadd){
     		$this->phasenum++;
     	}
-        else {
-    		$this->phasenum++;	
-    	}
         parent::__construct();
     }
 
