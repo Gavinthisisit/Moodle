@@ -296,10 +296,9 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                //TODO link button to joinin.php
                 $std_btn = new stdClass();
                 $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
-                $std_btn->str = get_string('joininbutton', 'teamwork');
+                $std_btn->str = get_string('createteam', 'teamwork');
                 $std_btn->method = 'post';
                 $std_btn->actions = array();
                 if (count($DB->get_records('teamwork_team', array('templet' => $templet->id))) >= $templet->teamlimit) {
@@ -345,9 +344,13 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $add_btn = get_string('addproject', 'teamwork');
             $output .= $this->single_button("templet_edit.php?id=$conf->teamwork", $add_btn, 'post');
         }
+        else {
+            $add_btn = get_string('joininteam', 'teamwork');
+            $output .= $this->single_button('joinin_team.php', $add_btn, 'post');
+        }
         if ($conf->edit_team_info) {
             $edit_btn = get_string('editteaminfo', 'teamwork');
-            $output .= $this->single_button("sdf", $edit_btn, 'post');
+            $output .= $this->single_button('team_manager.php', $edit_btn, 'post');
         }
         $output .= html_writer::end_tag('div');
         return $output;
@@ -375,10 +378,9 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                //TODO link button to joinin.php
                 $std_btn = new stdClass();
                 $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
-                $std_btn->str = get_string('joininbutton', 'teamwork');
+                $std_btn->str = get_string('createteam', 'teamwork');
                 $std_btn->method = 'post';
                 $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, array('disabled' => true));
                 $output .= html_writer::end_tag('div');
@@ -427,7 +429,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                //TODO link button to joinin.php
                 $std_btn = new stdClass();
                 $std_btn->url = new moodle_url('templet_edit.php',array('id' => $list->teamwork, 'update' => $templet->id));
                 $std_btn->str = get_string('edittemplet', 'teamwork');

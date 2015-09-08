@@ -1,0 +1,6 @@
+This files describes API changes in /mod/randchoice/*,
+information provided here is intended especially for developers.
+
+=== 2.9 ===
+
+* custom renderers must be updated to include action=makerandchoice field in display_options()

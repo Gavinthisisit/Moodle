@@ -1,0 +1,61 @@
+.path-mod-randchoice .results {border-collapse: separate;}
+.path-mod-randchoice .results .data {vertical-align:top;white-space: nowrap;}
+.path-mod-randchoice .button {text-align:center;}
+.path-mod-randchoice .attemptcell {width:5px;white-space: nowrap;}
+.path-mod-randchoice .anonymous,
+.path-mod-randchoice .names {margin-left:auto;margin-right:auto; width:80%;}
+.path-mod-randchoice .downloadreport {border-width:0;margin-left:10%;}
+.path-mod-randchoice .randchoiceresponse {width:100%;}
+.path-mod-randchoice .randchoiceresponse .picture {width:10px;white-space: nowrap;}
+.path-mod-randchoice .randchoiceresponse .fullname {width:100%;white-space: nowrap;}
+
+.path-mod-randchoice .responseheader {width: 100%; text-align: center; margin-top: 10px;}
+.path-mod-randchoice .randchoices .option label {vertical-align: top;}
+.path-mod-randchoice .randchoices .option input {vertical-align: middle;}
+
+.path-mod-randchoice .horizontal,
+.path-mod-randchoice .vertical {margin-left: 10%;margin-right: 10%;}
+.path-mod-randchoice .horizontal .randchoices .option {padding-right: 20px; display: inline-block; white-space: normal;}
+.path-mod-randchoice .horizontal .randchoices .button {margin-top: 10px;}
+.path-mod-randchoice ul.randchoices li {list-style:none;}
+.path-mod-randchoice .results { text-align: center;}
+.path-mod-randchoice .results.anonymous .graph.horizontal {vertical-align: middle;text-align: left;width:70%;}
+
+.path-mod-randchoice .results.anonymous .graph.vertical,
+.path-mod-randchoice .cell {vertical-align: bottom; text-align: center; }
+.path-mod-randchoice .results.anonymous th.header {border: 1px solid inherit;}
+
+.path-mod-randchoice .results.names .header{width:10%; white-space: normal;}
+.path-mod-randchoice .results.names .cell{vertical-align: top; text-align: left;}
+.path-mod-randchoice .results.names .user,
+.path-mod-randchoice #yourselection {padding: 5px;}
+.path-mod-randchoice .results.names .user .attemptaction,
+.path-mod-randchoice .results.names .user .image,
+.path-mod-randchoice .results.names .user .fullname{float:left;}
+.path-mod-randchoice .results.names .user .fullname{padding-left: 5px;}
+.path-mod-randchoice .results .data.header {width: 10%;}
+.path-mod-randchoice .responseaction {text-align: center;}
+.path-mod-randchoice .results .option {white-space: normal;}
+.path-mod-randchoice .response {overflow: auto;}
+.path-mod-randchoice .results .option,
+.path-mod-randchoice .results .numberofuser,
+.path-mod-randchoice .results .percentage {font-weight: bold; font-size: 108%;}
+
+#page-mod-randchoice-report .downloadreport ul li {list-style:none;padding: 0 20px; display: inline;float: left; }
+.path-mod-randchoice .clearfloat {float:none; clear:both;}
+
+/**
+ * Override for RTL layout
+ */
+.path-mod-randchoice.dir-rtl .horizontal .randchoices .option {padding-right:0px; padding-left: 20px; float:right;}
+.path-mod-randchoice.dir-rtl .results.anonymous .graph.horizontal {text-align: right;}
+.path-mod-randchoice.dir-rtl .results.anonymous { text-align: center; }
+.path-mod-randchoice.dir-rtl .results.names .cell{text-align: right;}
+.path-mod-randchoice.dir-rtl .results.names .user .attemptaction,
+.path-mod-randchoice.dir-rtl .results.names .user .image,
+.path-mod-randchoice.dir-rtl .results.names .user .fullname,
+.path-mod-randchoice.dir-rtl .results.names .user .fullname{padding-left: 0px; padding-right: 5px;}
+.path-mod-randchoice.dir-rtl .downloadreport {margin-left:0;margin-right: 25%;}
+
+#page-mod-randchoice-report.dir-rtl .downloadreport ul li{float:right;}
+#page-mod-randchoice-view.dir-rtl .reportlink {text-align: left;}
