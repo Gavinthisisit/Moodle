@@ -50,7 +50,7 @@ class mod_randchoice_renderer extends plugin_renderer_base {
         $randchoicecount = 0;
         foreach ($options['options'] as $option) {
             $randchoicecount++;
-            $html .= html_writer::start_tag('li', array('class'=>'option'));
+            //$html .= html_writer::start_tag('li', array('class'=>'option'));
             if ($multiple) {
                 $option->attributes->name = 'answer[]';
                 $option->attributes->type = 'checkbox';
@@ -66,9 +66,9 @@ class mod_randchoice_renderer extends plugin_renderer_base {
                 $availableoption--;
             }
 
-            $html .= html_writer::empty_tag('input', (array)$option->attributes + $disabled);
-            $html .= html_writer::tag('label', $labeltext, array('for'=>$option->attributes->id));
-            $html .= html_writer::end_tag('li');
+            //$html .= html_writer::empty_tag('input', (array)$option->attributes + $disabled);
+            //$html .= html_writer::tag('label', $labeltext, array('for'=>$option->attributes->id));
+            //$html .= html_writer::end_tag('li');
         }
         $html .= html_writer::tag('li','', array('class'=>'clearfloat'));
         $html .= html_writer::end_tag('ul');
@@ -76,6 +76,7 @@ class mod_randchoice_renderer extends plugin_renderer_base {
         $html .= html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'sesskey', 'value'=>sesskey()));
         $html .= html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'action', 'value'=>'makerandchoice'));
         $html .= html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'id', 'value'=>$coursemoduleid));
+        $html .= html_writer::empty_tag('input', array('type'=>'hidden', 'name'=>'answer', 'value'=>$availableoption));
 
         if (empty($options['previewonly'])) {
             if (!empty($options['hascapability']) && ($options['hascapability'])) {

@@ -72,6 +72,7 @@ if (data_submitted() && is_enrolled($context, NULL, 'mod/randchoice:choose') && 
     }
 
     if ($answer) {
+        $answer = rand(1, $answer);
         randchoice_user_submit_response($answer, $randchoice, $USER->id, $course, $cm);
         redirect(new moodle_url('/mod/randchoice/view.php',
             array('id' => $cm->id, 'notify' => 'randchoicesaved', 'sesskey' => sesskey())));
@@ -129,6 +130,7 @@ if ($randchoice->intro) {
 }
 
 $timenow = time();
+//var_dump($timenow); die;
 $current = $DB->get_records('randchoice_answers', array('randchoiceid' => $randchoice->id, 'userid' => $USER->id));
 //if user has already made a selection, and they are not allowed to update it or if randchoice is not open, show their selected answer.
 if (isloggedin() && (!empty($current)) &&
@@ -194,7 +196,7 @@ if (!$randchoiceformshown) {
 }
 
 // print the results at the bottom of the screen
-/*if ( $randchoice->showresults == CHOICE_SHOWRESULTS_ALWAYS or
+if ( $randchoice->showresults == CHOICE_SHOWRESULTS_ALWAYS or
     ($randchoice->showresults == CHOICE_SHOWRESULTS_AFTER_ANSWER and $current) or
     ($randchoice->showresults == CHOICE_SHOWRESULTS_AFTER_CLOSE and !$randchoiceopen)) {
 
@@ -208,6 +210,6 @@ if (!$randchoiceformshown) {
 
 } else if (!$randchoiceformshown) {
     echo $OUTPUT->box(get_string('noresultsviewable', 'randchoice'));
-}*/
+}
 
 echo $OUTPUT->footer();
