@@ -283,6 +283,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      */
     protected function render_teamwork_templet_list(teamwork_templet_list $list) {
         global $DB;
+        $teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
@@ -366,6 +367,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      */
     protected function render_teamwork_templet_list_member(teamwork_templet_list_member $list) {
     	global $DB;
+    	$teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
