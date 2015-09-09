@@ -286,6 +286,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         if (! empty($list->container)) {
             foreach ($list->container as $id => $templet) {
@@ -364,9 +365,11 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list_member(teamwork_templet_list_member $list) {
+    	global $DB;
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         //var_dump($list->url);
         if (! empty($list->container)) {
@@ -415,9 +418,12 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list_manager(teamwork_templet_list_manager $list) {
+    	global $DB;
+    	$teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
         $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         //var_dump($list->url);
         if (! empty($list->container)) {
