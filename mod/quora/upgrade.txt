@@ -1,0 +1,59 @@
+This files describes API changes in /mod/quora/*,
+information provided here is intended especially for developers.
+
+=== 2.8 ===
+ * The following functions have all been marked as deprecated. Many of
+   these have not been supported in many releases and should not be relied
+   upon:
+     quora_count_unrated_posts
+     quora_tp_count_discussion_read_records
+     quora_get_user_discussions
+     quora_tp_count_quora_posts
+     quora_tp_count_quora_read_records
+     quora_get_open_modes
+     quora_get_child_posts
+     quora_get_discussion_posts
+     quora_get_ratings
+     quora_get_tracking_link
+     quora_tp_count_discussion_unread_posts
+     quora_convert_to_roles
+     quora_tp_get_read_records
+     quora_tp_get_discussion_read_records
+     quora_user_enrolled
+     quora_user_can_view_post
+ * The following functions have been deprecated and replaced. Please see the phpdoc for each on the new function to use instead:
+   * quora_is_subscribed
+   * quora_subscribe
+   * quora_unsubscribe
+   * quora_subscribed_users
+   * quora_is_forcesubscribed
+   * quora_forcesubscribe
+   * quora_get_forcesubscribed
+   * quora_get_subscribed_quoras
+   * quora_get_optional_subscribed_quoras
+   * quora_get_potential_subscribers
+ * External function mod_quora_external::get_quora_discussions has been deprecated.
+   Use mod_quora_external::get_quora_discussions_paginated instead.
+
+=== 2.6 ===
+
+* The file post_form.php should not be included, the class it contained has
+  been moved so that it can benefit from autoloading.
+* The function quora_shorten_post() has been deprecated. It was doing a poor
+  job of shortening quora post text and the shorten_text() function does a
+  much better job.
+* The constant FORUM_TRACKING_ON has been depreciated and replaced by
+  FORUM_TRACKING_FORCED. The value between them is maintained, so they are
+  interchangeable, but code should migrate to the new name.
+
+=== 2.5 ===
+
+The function quora_check_throttling has been changed so that a warning object is returned when a user has reached the 'Post threshold for warning' or
+'Post threshold for blocking' setting, rather than echoing this on screen. This allows the warning to be moved inside the post form as it can be added
+as a HTML element, where it is more noticeable. False is returned if there is no need to warn, or restrict the user from posting - see MDL-39182.
+
+=== 2.3.5, 2.4.2 ===
+
+* mod/quora:allowforcesubscribe capability will be forcefully assigned to frontpage role, as it was mistakenly missed off
+when the capability was initially created. If you don't want users with frontpage role to get quora (with forcesubscribe) emails,
+then please remove this capability for frontpage role.

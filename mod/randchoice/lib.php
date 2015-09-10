@@ -457,7 +457,7 @@ function randchoice_show_reportlink($user, $cm) {
  * @param object $course
  * @param object $coursemodule
  * @param array $allresponses
-
+ 
  *  * @param bool $allresponses
  * @return object
  */

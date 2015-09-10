@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_quora-subscriptiontoggle",
+    "builds": {
+        "moodle-mod_quora-subscriptiontoggle": {
+            "jsfiles": [
+                "toggle.js"
+            ]
+        }
+    }
+}

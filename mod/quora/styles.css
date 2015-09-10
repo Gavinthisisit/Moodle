@@ -1,0 +1,167 @@
+/**
+ * Structure of a quora post
+ * div.quorapost(.read.unread)
+ *     div.header.row
+ *         div.picture.left
+ *         div.topic(.starter)
+ *             div.subject
+ *             div.author
+ *     div.row
+ *         div.side.left
+ *         div.content-mask
+ *             div.content
+ *                 div.attachments
+ *                 div.posting(.shortenedpost|.fullpost)
+ *                     // message
+ *                 div.attachedimages
+ *                     // attachedimages
+ *     div.row
+ *         div.left
+ *         div.options
+ *             div.commands
+ *             div.post-word-count
+ *             div.quora-post-rating
+ *             div.link
+ *             div.footer
+ */
+
+.quorapost {display: block;position:relative;margin:0 0 1em 0;padding:0;border:1px solid #000;max-width:100%;}
+.quorapost .row {width:100%;position:relative;}
+.quorapost .row .left {float:left;width: 43px;overflow:hidden;}
+.quorapost .row .left .grouppictures a {text-align:center;display:block;margin:6px 2px 0 2px;}
+.quorapost .row .left .grouppicture {width:20px;height:20px;}
+.quorapost .row .topic,
+.quorapost .row .content-mask,
+.quorapost .row .options {margin-left:43px;}
+.quorapost .picture img {margin:4px;}
+.quorapost .options .commands,
+.quorapost .content .attachments,
+.quorapost .options .footer,
+.quorapost .options .link {text-align:right;}
+.quorapost .options .quora-post-rating {float:left;}
+.quorapost .content .posting {overflow:auto;max-width:100%;}
+.quorapost .content .attachedimages img {max-width:100%;}
+.quorapost .post-word-count { font-size: .85em; font-style: italic; }
+.quorapost .shortenedpost .post-word-count { display: inline; padding: 0 .3em; }
+
+.dir-rtl .quorapost .row .topic,
+.dir-rtl .quorapost .row .content-mask,
+.dir-rtl .quorapost .row .options {margin-right:43px;margin-left:0;}
+.dir-rtl .quorapost .row .left {float:right;}
+.dir-rtl.path-mod-quora .indent {
+    margin-right: 3%;
+    margin-left: 0;
+}
+
+.path-mod-quora .quoraolddiscuss,
+#page-mod-quora-search .c0 {text-align:right;}
+.path-mod-quora .indent {
+    margin-left: 3%;
+}
+.path-mod-quora .quoraheaderlist {width: 100%;border-width:1px;border-style:solid;border-collapse:separate;margin-top: 10px;}
+.path-mod-quora .quoraheaderlist td {border-width:1px 0px 0px 1px;border-style:solid;}
+.path-mod-quora .quoraheaderlist th.header.replies .iconsmall { margin: 0 .3em;}
+.path-mod-quora .quoraheaderlist .picture {width: 35px;}
+.path-mod-quora .quoraheaderlist .discussion .starter {vertical-align: middle;}
+.path-mod-quora .quoraheaderlist .discussion .lastpost {white-space: nowrap;text-align: right;}
+.path-mod-quora .quoraheaderlist .replies,
+.path-mod-quora .quoraheaderlist .discussion .author {white-space: nowrap;}
+.path-mod-quora .quoraheaderlist thead .discussionsubscription {
+    text-align: center;
+}
+
+/** Styles for subscribers.php */
+#page-mod-quora-subscribers .subscriberdiv,
+#page-mod-quora-subscribers .subscribertable {width:100%;vertical-align:top;}
+#page-mod-quora-subscribers .subscribertable tr td {vertical-align:top;}
+#page-mod-quora-subscribers .subscribertable tr td.actions {width:16%;padding-top:3em;}
+#page-mod-quora-subscribers .subscribertable tr td.actions .actionbutton {margin:0.3em 0;padding:0.5em 0;width:100%;}
+#page-mod-quora-subscribers .subscribertable tr td.existing,
+#page-mod-quora-subscribers .subscribertable tr td.potential {width:42%;}
+
+/** Styles for discuss.php **/
+#page-mod-quora-discuss .discussioncontrols {width:100%;margin:5px;}
+#page-mod-quora-discuss .discussioncontrols .discussioncontrol {width:33%;float:left;}
+#page-mod-quora-discuss .discussioncontrol.exporttoportfolio {text-align:left;}
+#page-mod-quora-discuss .discussioncontrol.displaymode {text-align:center;}
+#page-mod-quora-discuss .discussioncontrol.movediscussion {float:right;width:auto;text-align:right;padding-right:10px;}
+#page-mod-quora-discuss .discussioncontrol.movediscussion .movediscussionoption {}
+
+/** Styles for view.php **/
+#page-mod-quora-view .quoraaddnew {margin-bottom: 20px;}
+#page-mod-quora-view .groupmenu {float: left;text-align:left;white-space: nowrap;}
+#page-mod-quora-index .subscription,
+#page-mod-quora-view .subscription {float: right;text-align:right;white-space: nowrap;margin: 5px 0;}
+
+/** Styles for search.php */
+#page-mod-quora-search .introcontent {padding: 15px;font-weight:bold;}
+
+#page-mod-quora-index .unread a:first-child,
+#page-mod-quora-view .unread a:first-child {padding-right: 10px;}
+#page-mod-quora-index .unread img,
+#page-mod-quora-view .unread img {margin-left: 5px;}
+#page-mod-quora-view .unread img {margin-left: 5px;}
+.dir-rtl#page-mod-quora-view .unread img {margin-right: 5px; margin-left: 0; }
+
+/** Unknown Styles ??? */
+#email .unsubscribelink {margin-top:20px;}
+
+/* Forumpost unread
+-------------------------*/
+#page-mod-quora-view .unread,
+.quorapost.unread .row.header,
+.path-course-view .unread,
+span.unread {
+    background-color: #FFD;
+}
+.quorapost.unread .row.header {
+    border-bottom: 1px solid #DDD;
+}
+
+/* Discussion navigation */
+.path-mod-quora .discussion-nav {
+    margin: .5em 0;
+}
+.path-mod-quora .discussion-nav ul {
+    margin: 0;
+    list-style: none;
+}
+.dir-rtl.path-mod-quora .discussion-nav .next-discussion:after,
+.path-mod-quora .discussion-nav .prev-discussion:before {
+    content: ' ◄ ';
+}
+.dir-rtl.path-mod-quora .discussion-nav .prev-discussion:before,
+.path-mod-quora .discussion-nav .next-discussion:after {
+    content: ' ► ';
+}
+.dir-rtl.path-mod-quora .discussion-nav .prev-discussion,
+.path-mod-quora .discussion-nav .next-discussion {
+    float: right;
+}
+.dir-rtl.path-mod-quora .discussion-nav .next-discussion,
+.path-mod-quora .discussion-nav .prev-discussion {
+    float: left;
+}
+
+.path-mod-quora .preload-subscribe {
+    background: url([[pix:mod_quora|t/subscribed]]) no-repeat -9999px -9999px;
+}
+
+.path-mod-quora .preload-unsubscribe {
+    background: url([[pix:mod_quora|t/unsubscribed]]) no-repeat -9999px -9999px;
+}
+
+.path-mod-quora .discussionsubscription {
+    margin-top: -10px;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.path-mod-quora .discussionsubscription > a > img {
+    width: 12px;
+    padding: 0 4px;
+}
+
+.dir-rtl .path-mod-quora .discussionsubscription {
+    text-align: left;
+}

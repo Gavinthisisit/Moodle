@@ -191,7 +191,6 @@ if (!$randchoiceformshown) {
         echo $OUTPUT->single_button(new moodle_url('/enrol/index.php?', array('id'=>$course->id)), get_string('enrolme', 'core_enrol', $courseshortname));
         echo $OUTPUT->container_end();
         echo $OUTPUT->box_end();
-
     }
 }
 
