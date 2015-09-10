@@ -1547,6 +1547,10 @@ function teamwork_extend_navigation(navigation_node $navref, stdclass $course, s
         $url = new moodle_url('/course/modedit.php', array('update' => $cm->id));
         $mysubmission = $navref->add(get_string('editsettings', 'teamwork'), $url);
         $mysubmission->mainnavonly = true;
+    }else {
+    	$url = new moodle_url('/mod/teamwork/view.php', array('id' => $cm->id));
+        $mysubmission = $navref->add(get_string('templetlist', 'teamwork'), $url);
+        $mysubmission->mainnavonly = true;
     }
 }
 
