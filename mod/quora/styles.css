@@ -1,6 +1,6 @@
 /**
  * Structure of a quora post
- * div.quorapost(.read.unread)
+ * div.forumpost(.read.unread)
  *     div.header.row
  *         div.picture.left
  *         div.topic(.starter)
@@ -25,29 +25,29 @@
  *             div.footer
  */
 
-.quorapost {display: block;position:relative;margin:0 0 1em 0;padding:0;border:1px solid #000;max-width:100%;}
-.quorapost .row {width:100%;position:relative;}
-.quorapost .row .left {float:left;width: 43px;overflow:hidden;}
-.quorapost .row .left .grouppictures a {text-align:center;display:block;margin:6px 2px 0 2px;}
-.quorapost .row .left .grouppicture {width:20px;height:20px;}
-.quorapost .row .topic,
-.quorapost .row .content-mask,
-.quorapost .row .options {margin-left:43px;}
-.quorapost .picture img {margin:4px;}
-.quorapost .options .commands,
-.quorapost .content .attachments,
-.quorapost .options .footer,
-.quorapost .options .link {text-align:right;}
-.quorapost .options .quora-post-rating {float:left;}
-.quorapost .content .posting {overflow:auto;max-width:100%;}
-.quorapost .content .attachedimages img {max-width:100%;}
-.quorapost .post-word-count { font-size: .85em; font-style: italic; }
-.quorapost .shortenedpost .post-word-count { display: inline; padding: 0 .3em; }
+.forumpost {display: block;position:relative;margin:0 0 1em 0;padding:0;border:1px solid #000;max-width:100%;}
+.forumpost .row {width:100%;position:relative;}
+.forumpost .row .left {float:left;width: 43px;overflow:hidden;}
+.forumpost .row .left .grouppictures a {text-align:center;display:block;margin:6px 2px 0 2px;}
+.forumpost .row .left .grouppicture {width:20px;height:20px;}
+.forumpost .row .topic,
+.forumpost .row .content-mask,
+.forumpost .row .options {margin-left:43px;}
+.forumpost .picture img {margin:4px;}
+.forumpost .options .commands,
+.forumpost .content .attachments,
+.forumpost .options .footer,
+.forumpost .options .link {text-align:right;}
+.forumpost .options .quora-post-rating {float:left;}
+.forumpost .content .posting {overflow:auto;max-width:100%;}
+.forumpost .content .attachedimages img {max-width:100%;}
+.forumpost .post-word-count { font-size: .85em; font-style: italic; }
+.forumpost .shortenedpost .post-word-count { display: inline; padding: 0 .3em; }
 
-.dir-rtl .quorapost .row .topic,
-.dir-rtl .quorapost .row .content-mask,
-.dir-rtl .quorapost .row .options {margin-right:43px;margin-left:0;}
-.dir-rtl .quorapost .row .left {float:right;}
+.dir-rtl .forumpost .row .topic,
+.dir-rtl .forumpost .row .content-mask,
+.dir-rtl .forumpost .row .options {margin-right:43px;margin-left:0;}
+.dir-rtl .forumpost .row .left {float:right;}
 .dir-rtl.path-mod-quora .indent {
     margin-right: 3%;
     margin-left: 0;
@@ -58,15 +58,16 @@
 .path-mod-quora .indent {
     margin-left: 3%;
 }
-.path-mod-quora .quoraheaderlist {width: 100%;border-width:1px;border-style:solid;border-collapse:separate;margin-top: 10px;}
-.path-mod-quora .quoraheaderlist td {border-width:1px 0px 0px 1px;border-style:solid;}
-.path-mod-quora .quoraheaderlist th.header.replies .iconsmall { margin: 0 .3em;}
-.path-mod-quora .quoraheaderlist .picture {width: 35px;}
-.path-mod-quora .quoraheaderlist .discussion .starter {vertical-align: middle;}
-.path-mod-quora .quoraheaderlist .discussion .lastpost {white-space: nowrap;text-align: right;}
-.path-mod-quora .quoraheaderlist .replies,
-.path-mod-quora .quoraheaderlist .discussion .author {white-space: nowrap;}
-.path-mod-quora .quoraheaderlist thead .discussionsubscription {
+
+.path-mod-quora .forumheaderlist {width: 100%;border-width:0px;border-style:solid;border-collapse:collapse;margin-top: 10px;}
+.path-mod-quora .forumheaderlist td {border-width:0px 0px 0px 0px;border-style:solid;}
+.path-mod-quora .forumheaderlist th.header.replies .iconsmall { margin: 0 .3em;}
+.path-mod-quora .forumheaderlist .picture {width: 35px;}
+.path-mod-quora .forumheaderlist .discussion .starter {vertical-align: middle;}
+.path-mod-quora .forumheaderlist .discussion .lastpost {white-space: nowrap;text-align: right;}
+.path-mod-quora .forumheaderlist .replies,
+.path-mod-quora .forumheaderlist .discussion .author {white-space: nowrap;}
+.path-mod-quora .forumheaderlist thead .discussionsubscription {
     text-align: center;
 }
 
@@ -109,12 +110,12 @@
 /* Forumpost unread
 -------------------------*/
 #page-mod-quora-view .unread,
-.quorapost.unread .row.header,
+.forumpost.unread .row.header,
 .path-course-view .unread,
 span.unread {
     background-color: #FFD;
 }
-.quorapost.unread .row.header {
+.forumpost.unread .row.header {
     border-bottom: 1px solid #DDD;
 }
 

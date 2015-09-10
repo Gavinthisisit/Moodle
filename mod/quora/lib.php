@@ -3217,7 +3217,7 @@ function quora_print_post($post, $discussion, $quora, &$cm, $course, $ownpost=fa
             return;
         }
         $output .= html_writer::tag('a', '', array('id'=>'p'.$post->id));
-        $output .= html_writer::start_tag('div', array('class'=>'quorapost clearfix',
+        $output .= html_writer::start_tag('div', array('class'=>'forumpost clearfix',
                                                        'role' => 'region',
                                                        'aria-label' => get_string('hiddenquorapost', 'quora')));
         $output .= html_writer::start_tag('div', array('class'=>'row header'));
@@ -3397,7 +3397,7 @@ function quora_print_post($post, $discussion, $quora, &$cm, $course, $ownpost=fa
     $postbyuser->user = $postuser->fullname;
     $discussionbyuser = get_string('postbyuser', 'quora', $postbyuser);
     $output .= html_writer::tag('a', '', array('id'=>'p'.$post->id));
-    $output .= html_writer::start_tag('div', array('class'=>'quorapost clearfix'.$quorapostclass.$topicclass,
+    $output .= html_writer::start_tag('div', array('class'=>'forumpost clearfix'.$quorapostclass.$topicclass,
                                                    'role' => 'region',
                                                    'aria-label' => $discussionbyuser));
     $output .= html_writer::start_tag('div', array('class'=>'row header clearfix'));
@@ -5403,7 +5403,7 @@ function quora_print_latest_discussions($course, $quora, $maxdiscussions = -1, $
     }
 
     if ($displayformat == 'header') {
-        echo '<table cellspacing="0" class="quoraheaderlist">';
+        echo '<table cellspacing="0" class="forumheaderlist">';
         echo '<thead>';
         echo '<tr>';
         echo '<th class="header topic" scope="col">'.get_string('discussion', 'quora').'</th>';
@@ -6957,7 +6957,7 @@ function quora_reset_userdata($data) {
  * @param $mform form passed by reference
  */
 function quora_reset_course_form_definition(&$mform) {
-    $mform->addElement('header', 'quoraheader', get_string('modulenameplural', 'quora'));
+    $mform->addElement('header', 'forumheader', get_string('modulenameplural', 'quora'));
 
     $mform->addElement('checkbox', 'reset_quora_all', get_string('resetquorasall','quora'));
 
