@@ -361,3 +361,7 @@ $string['phasedescription'] = 'Phase Description';
 $string['phasestart'] = 'Phase Start Date';
 $string['phaseend'] = 'Phase End Date';
 $string['phasenumber'] = 'Phase {$a}';
+$string['name'] = 'Name';
+$string['removemember'] = 'Remove Member';
+$string['jointime'] = 'Join Time';
+$string['invitedkey'] = 'Invitation Code';

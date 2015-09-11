@@ -352,7 +352,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         }
         if ($conf->edit_team_info) {
             $edit_btn = get_string('editteaminfo', 'teamwork');
-            $output .= $this->single_button('team_manager.php', $edit_btn, 'post');
+            $output .= $this->single_button("team_manage.php?w=$conf->teamwork", $edit_btn, 'post');
         }
         $output .= html_writer::end_tag('div');
         return $output;
@@ -465,7 +465,43 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $output .= html_writer::end_tag('div');
         return $output;
     }
-
+    
+    protected function render_teamwork_team_invitedkey(teamwork_team_invitedkey $teaminvitedkey) {
+    	global $DB;
+    	$team = $DB->get_record('teamwork_team',array('id' => $teaminvitedkey->teamid));
+		$output = '';
+        $output .= html_writer::start_tag('div', array('class' => 'alert alert-success'));
+		$output .= $team->invitedkey;
+		$output .= html_writer::end_tag('div');
+		return $output;
+	}
+	
+	protected function render_teamwork_team_manage(teamwork_team_manage $teammanage) {
+		global $DB;
+    	$teammembers = $DB->get_records('teamwork_teammembers',array('teamwork' => $teammanage->teamwork,'team' =>$teammanage->teamid));
+		$table = new html_table();
+		$table->head = array(get_string('name','teamwork'),get_string('jointime','teamwork'),get_string('removemember','teamwork'));	
+		$rowarray = array();
+		
+		foreach($teammembers as $member){
+			$row = new html_table_row();
+			$cell1 = new html_table_cell();
+			$cell2 = new html_table_cell();
+			$icon = 't/delete';
+			$member_record = $DB->get_record('user',array('id'=>$member->userid));
+        	$cell1->text = $member_record->lastname.$member_record->firstname;
+        	$cell2->text = date("Y.m.d H:i:s",$member->jointime);
+        	$row->cells[] = $cell1;
+        	$row->cells[] = $cell2; 
+        	$row->cells[] = $this->output->action_icon("team_manage.php?w=$teammanage->teamwork&teamid=$teammanage->teamid&remove=$member->userid", new pix_icon($icon, get_string('removemember', 'teamwork')));
+        
+        	$rowarray[] = $row;
+		}
+		
+		$table->data = $rowarray;
+		$output .= html_writer::table($table);
+		return $output;
+	}
     /**
      * Renders the user plannner tool
      *

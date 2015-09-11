@@ -353,3 +353,7 @@ $string['phasedescription'] = '阶段描述';
 $string['phasestart'] = '阶段开始时间';
 $string['phaseend'] = '阶段结束时间';
 $string['phasenumber'] = '阶段 {$a}';
+$string['name'] = '姓名';
+$string['removemember'] = '移除成员';
+$string['jointime'] = '加入时间';
+$string['invitedkey'] = '邀请码';

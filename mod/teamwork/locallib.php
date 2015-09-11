@@ -2900,6 +2900,57 @@ class teamwork_templet_buttons implements renderable {
     }
 }
 
+/**
+ * Team Invitation Code
+ *
+ * @author lkq
+ * @see teamwork_renderer::render_teamwork_team_invitedkey
+ */
+class teamwork_team_invitedkey implements renderable {
+    /** @var int teamworkid */
+    public $teamwork;
+    /** @var int teamid */
+    public $teamid;
+
+
+    /**
+     * Prepare a buttons view for the given messages.
+     *
+     * @param int $teamwork
+     * @param int $reamid
+     */
+    public function __construct($teamwork, $teamid) {
+        $this->teamwork = $teamwork;
+        $this->teamid = $teamid;
+    }
+}
+
+/**
+ * Team manage page
+ *
+ * @author lkq
+ * @see teamwork_renderer::render_teamwork_team_manage
+ */
+class teamwork_team_manage implements renderable {
+    /** @var int teamworkid */
+    public $teamwork;
+    /** @var int teamid */
+    public $teamid;
+
+
+    /**
+     * Prepare a buttons view for the given messages.
+     *
+     * @param int $teamwork
+     * @param int $reamid
+     * @param bool $create_templet
+     * @param bool $edit_team_info 
+     */
+    public function __construct($teamwork, $teamid) {
+        $this->teamwork = $teamwork;
+        $this->teamid = $teamid;
+    }
+}
 
 /**
  * Represents the user planner tool
