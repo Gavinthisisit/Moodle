@@ -348,7 +348,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         }
         else {
             $add_btn = get_string('joininteam', 'teamwork');
-            $output .= $this->single_button('joinin_team.php', $add_btn, 'post');
+            $output .= $this->single_button("jointeam.php?teamworkid=$conf->teamwork", $add_btn, 'post');
         }
         if ($conf->edit_team_info) {
             $edit_btn = get_string('editteaminfo', 'teamwork');
@@ -490,7 +490,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 			$icon = 't/delete';
 			$member_record = $DB->get_record('user',array('id'=>$member->userid));
         	$cell1->text = $member_record->lastname.$member_record->firstname;
-        	$cell2->text = date("Y.m.d H:i:s",$member->jointime);
+        	$cell2->text = date("Y.m.d H:i:s",$member->time);
         	$row->cells[] = $cell1;
         	$row->cells[] = $cell2; 
         	$row->cells[] = $this->output->action_icon("team_manage.php?w=$teammanage->teamwork&teamid=$teammanage->teamid&remove=$member->userid", new pix_icon($icon, get_string('removemember', 'teamwork')));

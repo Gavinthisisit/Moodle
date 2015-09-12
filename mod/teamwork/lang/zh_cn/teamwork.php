@@ -357,3 +357,6 @@ $string['name'] = '姓名';
 $string['removemember'] = '移除成员';
 $string['jointime'] = '加入时间';
 $string['invitedkey'] = '邀请码';
+$string['invalidinvitedkey'] = '无效的邀请码';
+$string['hasjoinedtheteam'] = '已加入该团队';
+$string['joinedsuccess'] = '成功加入该团队';

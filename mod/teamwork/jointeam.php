@@ -28,8 +28,6 @@ require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/mod_form.php');
 
 $teamworkid = required_param('teamworkid', PARAM_INT);
-$templetid 	= required_param('templetid', PARAM_INT); 
-$update		= optional_param('update', 0, PARAM_INT);
 
 $cm         = get_coursemodule_from_instance('teamwork', $teamworkid, 0, false, MUST_EXIST);
 $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -41,21 +39,21 @@ $teamwork   = new teamwork($teamwork, $cm, $course);
 
 // todo: check if there already is some assessment done and do not allowed the change of the form
 // once somebody already used it to assess
-$team_edit_url = new moodle_url('/mod/teamwork/team_edit.php', array('id' => $templetid));
-$PAGE->set_url($team_edit_url);
+$jointeam_url = new moodle_url('/mod/teamwork/jointeam.php', array('teamworkid' => $teamworkid));
+$PAGE->set_url($jointeam_url);
 $PAGE->set_title($teamwork->name);
 $PAGE->set_heading($course->fullname);
-$PAGE->navbar->add(get_string('createteam', 'teamwork'));
+$PAGE->navbar->add(get_string('joininteam', 'teamwork'));
 
 
-$mform = new teamwork_teaminfo_form($course->id, $teamworkid, $templetid);
+$mform = new teamwork_jointeam_form($course->id, $teamworkid);
 
 
 if ($mform->is_cancelled()) {
     redirect($teamwork->view_url());
 } elseif ($data = $mform->get_data()) {
-    save_templet_data($data);
-    redirect($teamwork->view_url());
+	save_data($data);
+    redirect($teamwork->view_url(),get_string('joinedsuccess','teamwork'),1);
 }
 
 // Output starts here
@@ -68,25 +66,22 @@ $mform->display();
 echo $OUTPUT->footer();
 
 ////////////////////////////////
-function save_templet_data($data){
+function save_data($data){
 	global $DB, $USER;
-	$newteam = new stdClass();
-	$newteam->course = $data->courseid;
-	$newteam->teamwork = $data->teamworkid;
-	$newteam->name = $data->title;
-	$newteam->time = time();
-	$newteam->templet = $data->templetid;
-	$newteam->leader = (int)$USER->id;
-	$newteam->invitedkey = random_string(10);
-	//var_dump($newteam); die;
-	$DB->insert_record('teamwork_team',$newteam);
-
+	if(strlen($data->invitedkey)!=10){
+		redirect("jointeam.php?teamworkid=$data->teamworkid",get_string('invalidinvitedkey','teamwork'),1);
+	}
 	$newmember = new stdClass();
 	$newmember->course = $data->courseid;
 	$newmember->teamwork = $data->teamworkid;
-	$newmember->team = $DB->get_record('teamwork_team', array('templet' => $data->templetid, 'leader' => $USER->id))->id;
+	$newmember->team = $DB->get_record('teamwork_team', array('teamwork' => $data->teamworkid, 'invitedkey' => $data->invitedkey))->id;
 	$newmember->userid = $USER->id;
-	$newmember->leader = 1;
+	$newmember->leader = 0;
 	$newmember->time = time();
+	$hasrecord = $DB->get_record('teamwork_teammembers', array('teamwork' => $data->teamworkid, 'team' => $newmember->team,'userid' => $newmember->userid));
+
+	if(!empty($hasrecord)){
+		redirect("jointeam.php?teamworkid=$data->teamworkid",get_string('hasjoinedtheteam','teamwork'),1);
+	}
 	$DB->insert_record('teamwork_teammembers', $newmember);
 }

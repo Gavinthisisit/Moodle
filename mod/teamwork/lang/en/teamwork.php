@@ -365,3 +365,6 @@ $string['name'] = 'Name';
 $string['removemember'] = 'Remove Member';
 $string['jointime'] = 'Join Time';
 $string['invitedkey'] = 'Invitation Code';
+$string['invalidinvitedkey'] = 'Invalid Invitation Code';
+$string['hasjoinedtheteam'] = 'Has Joined The Team';
+$string['joinedsuccess'] = 'Joined Successfully';

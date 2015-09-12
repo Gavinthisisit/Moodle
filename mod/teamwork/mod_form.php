@@ -476,7 +476,62 @@ class teamwork_teaminfo_form extends moodleform {
         $mform->addElement('hidden', 'templetid', $this->templet);
         $mform->setType('templetid', PARAM_INT);
         //TODO
-        $mform->addElement('hidden', 'time', 12345);
+        $mform->addElement('hidden', 'time', time());
+        $mform->setType('time', PARAM_INT);
+        // Standard buttons, common to all modules ------------------------------------
+        $this->add_action_buttons();
+    }
+    //Custom validation should be added here
+    function validation($data, $files) {
+        return array();
+    }
+}
+
+/**
+ * teamwork join team form
+ */
+class teamwork_jointeam_form extends moodleform {
+
+    protected $course = 0;
+    protected $teamwork = 0;
+    
+    /**
+     * Constructor
+     */
+    public function __construct($course, $teamwork) {
+        $this->course = $course;
+        $this->teamwork = $teamwork;
+        parent::__construct();
+    }
+
+    //Add elements to form
+    public function definition() {
+        global $CFG;
+ 
+        $mform = $this->_form;
+
+        // General --------------------------------------------------------------------
+        $mform->addElement('header', 'general', get_string('general', 'form'));
+
+        // team title
+        $label = get_string('invitedkey', 'teamwork');
+        $mform->addElement('text', 'invitedkey', $label, array('size'=>'64'));
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('invitedkey', PARAM_TEXT);
+        } else {
+            $mform->setType('invitedkey', PARAM_CLEANHTML);
+        }
+        $mform->addRule('invitedkey', null, 'required', null, 'client');
+        $mform->addRule('invitedkey', get_string('maximumchars', '', 10), 'maxlength', 10, 'client');
+
+        //Hidden------------------------------------------------------------------------
+        $mform->addElement('hidden', 'courseid', $this->course);
+        $mform->setType('courseid', PARAM_INT);
+        $mform->addElement('hidden', 'teamworkid', $this->teamwork);
+        $mform->setType('teamworkid', PARAM_INT);
+
+        //TODO
+        $mform->addElement('hidden', 'time', time());
         $mform->setType('time', PARAM_INT);
         // Standard buttons, common to all modules ------------------------------------
         $this->add_action_buttons();
