@@ -24,6 +24,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+$string['teamhasfull'] = '该团队成员已满';
 $string['edittemplet'] = '更改项目设置';
 $string['teamtitle'] = '团队名称';
 $string['createteam'] = '创建团队';

@@ -21,6 +21,7 @@
  * @copyright  2009 David Mudrak <david@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+$string['teamhasfull'] = 'This team has been full';
 $string['edittemplet'] = 'Edit Projects setting';
 $string['createteam'] = 'Create a Team';
 $string['teamtitle'] = 'Team Name';

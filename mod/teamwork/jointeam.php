@@ -74,7 +74,17 @@ function save_data($data){
 	$newmember = new stdClass();
 	$newmember->course = $data->courseid;
 	$newmember->teamwork = $data->teamworkid;
-	$newmember->team = $DB->get_record('teamwork_team', array('teamwork' => $data->teamworkid, 'invitedkey' => $data->invitedkey))->id;
+	
+	$team_joined = $DB->get_record('teamwork_team', array('teamwork' => $data->teamworkid, 'invitedkey' => $data->invitedkey));
+	if(!$team_joined){
+		redirect("jointeam.php?teamworkid=$data->teamworkid",get_string('invalidinvitedkey','teamwork'),1);
+	}
+	$membernum = $DB->get_records('teamwork_teammembers', array('teamwork' => $data->teamworkid, 'team' => $team_joined->id));
+	$maxmember = $DB->get_record('teamwork_templet', array('teamwork' => $data->teamworkid, 'id' => $team_joined->templet))->teammaxmember;
+	if($maxmember <= count($membernum)){
+		redirect("jointeam.php?teamworkid=$data->teamworkid",get_string('teamhasfull','teamwork'),1);
+	}
+	$newmember->team = $team_joined->id;
 	$newmember->userid = $USER->id;
 	$newmember->leader = 0;
 	$newmember->time = time();
