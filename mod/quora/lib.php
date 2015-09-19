@@ -1407,7 +1407,7 @@ function quora_user_complete($course, $user, $mod, $quora) {
             }
             $discussion = $discussions[$post->discussion];
 
-            quora_print_post($post, $discussion, $quora, $cm, $course, false, false, false);
+            quora_print_post($post, $discussion, $quora, $cm, $course, $is_assessed, false, false, false);
         }
     } else {
         echo "<p>".get_string("noposts", "quora")."</p>";
@@ -3158,9 +3158,9 @@ function quora_make_mail_post($course, $cm, $quora, $discussion, $post, $userfro
  * @param bool|null $istracked
  * @return void
  */
-function quora_print_post($post, $discussion, $quora, &$cm, $course, $ownpost=false, $reply=false, $link=false,
+function quora_print_post($post, $discussion, $quora, &$cm, $course, $is_assessed, $ownpost=false, $reply=false, $link=false,
                           $footer="", $highlight="", $postisread=null, $dummyifcantsee=true, $istracked=null, $return=false) {
-    global $USER, $CFG, $OUTPUT;
+    global $USER, $CFG, $OUTPUT, $DB;
 
     require_once($CFG->libdir . '/filelib.php');
 
@@ -3407,8 +3407,13 @@ function quora_print_post($post, $discussion, $quora, &$cm, $course, $ownpost=fa
 
 
     $output .= html_writer::start_tag('div', array('class'=>'topic'.$topicclass));
-
-    $postsubject = $post->subject;
+    //NightCool
+    if ($post->parent) {
+        $postsubject = null;
+    }
+    else {
+        $postsubject = $post->subject;
+    }
     if (empty($post->subjectnoformat)) {
         $postsubject = format_string($postsubject);
     }
@@ -3487,10 +3492,38 @@ function quora_print_post($post, $discussion, $quora, &$cm, $course, $ownpost=fa
         $output .= html_writer::tag('div', $OUTPUT->render($post->rating), array('class'=>'quora-post-rating'));
     }
 
+    // Output assess button
+    if (($post->parent == $discussion->firstpost) && ($post->userid != $USER->id) && ((empty($is_assessed)) || (!in_array($post->id, $is_assessed)))) {
+        $target = new moodle_url('/mod/quora/discuss.php', array('d'=>$post->discussion));
+        $layoutclass = 'horizontal';
+        $attributes = array('method'=>'POST', 'action'=>$target, 'class'=> $layoutclass);
+        $output .= html_writer::start_tag('form', $attributes);
+        $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
+        $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'cid', 'value' => $course->id));
+        $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'qid', 'value' => $post->quora));
+        $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $post->id));
+        $output .= html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('praise', 'quora'), 'class' => 'button'));
+        $output .= html_writer::end_tag('form');
+    }
+
+    //Output the number of praise
+    if ($post->parent == 1) {
+        $output .= html_writer::start_tag('p');
+        $output .= get_string('praisecount', 'quora');
+        $as = $DB->get_records('quora_post_assessments', array('post' => $post->id));
+        $output .= count($as);
+        $output .= get_string('praisecounted', 'quora');
+        $output .= html_writer::end_tag('p');
+    }
+
     // Output the commands
     $commandhtml = array();
     foreach ($commands as $command) {
         if (is_array($command)) {
+            //NightCool
+            if ($command['text'] == '显示父帖子') {
+                continue;
+            }
             $commandhtml[] = html_writer::link($command['url'], $command['text']);
         } else {
             $commandhtml[] = $command;
@@ -5544,7 +5577,7 @@ function quora_print_latest_discussions($course, $quora, $maxdiscussions = -1, $
  * @param mixed $canreply
  * @param bool $canrate
  */
-function quora_print_discussion($course, $cm, $quora, $discussion, $post, $mode, $canreply=NULL, $canrate=false) {
+function quora_print_discussion($course, $cm, $quora, $discussion, $post, $mode, $canreply=NULL, $canrate=false, $is_assessed) {
     global $USER, $CFG;
 
     require_once($CFG->dirroot.'/rating/lib.php');
@@ -5621,22 +5654,22 @@ function quora_print_discussion($course, $cm, $quora, $discussion, $post, $mode,
 
     $postread = !empty($post->postread);
 
-    quora_print_post($post, $discussion, $quora, $cm, $course, $ownpost, $reply, false,
+    quora_print_post($post, $discussion, $quora, $cm, $course, $is_assessed, $ownpost, $reply, false,
                          '', '', $postread, true, $quoratracked);
 
     switch ($mode) {
         case FORUM_MODE_FLATOLDEST :
         case FORUM_MODE_FLATNEWEST :
         default:
-            quora_print_posts_flat($course, $cm, $quora, $discussion, $post, $mode, $reply, $quoratracked, $posts);
+            quora_print_posts_flat($course, $cm, $quora, $discussion, $post, $is_assessed, $mode, $reply, $quoratracked, $posts);
             break;
 
         case FORUM_MODE_THREADED :
-            quora_print_posts_threaded($course, $cm, $quora, $discussion, $post, 0, $reply, $quoratracked, $posts);
+            quora_print_posts_threaded($course, $cm, $quora, $discussion, $post, $is_assessed, 0, $reply, $quoratracked, $posts);
             break;
 
         case FORUM_MODE_NESTED :
-            quora_print_posts_nested($course, $cm, $quora, $discussion, $post, $reply, $quoratracked, $posts);
+            quora_print_posts_nested($course, $cm, $quora, $discussion, $post, $is_assessed, $reply, $quoratracked, $posts);
             break;
     }
 }
@@ -5657,7 +5690,7 @@ function quora_print_discussion($course, $cm, $quora, $discussion, $post, $mode,
  * @param array $posts
  * @return void
  */
-function quora_print_posts_flat($course, &$cm, $quora, $discussion, $post, $mode, $reply, $quoratracked, $posts) {
+function quora_print_posts_flat($course, &$cm, $quora, $discussion, $post, $is_assessed, $mode, $reply, $quoratracked, $posts) {
     global $USER, $CFG;
 
     $link  = false;
@@ -5677,7 +5710,7 @@ function quora_print_posts_flat($course, &$cm, $quora, $discussion, $post, $mode
 
         $postread = !empty($post->postread);
 
-        quora_print_post($post, $discussion, $quora, $cm, $course, $ownpost, $reply, $link,
+        quora_print_post($post, $discussion, $quora, $cm, $course, $is_assessed, $ownpost, $reply, $link,
                              '', '', $postread, true, $quoratracked);
     }
 }
@@ -5690,7 +5723,7 @@ function quora_print_posts_flat($course, &$cm, $quora, $discussion, $post, $mode
  * @uses CONTEXT_MODULE
  * @return void
  */
-function quora_print_posts_threaded($course, &$cm, $quora, $discussion, $parent, $depth, $reply, $quoratracked, $posts) {
+function quora_print_posts_threaded($course, &$cm, $quora, $discussion, $parent, $is_assessed, $depth, $reply, $quoratracked, $posts) {
     global $USER, $CFG;
 
     $link  = false;
@@ -5710,7 +5743,7 @@ function quora_print_posts_threaded($course, &$cm, $quora, $discussion, $parent,
 
                 $postread = !empty($post->postread);
 
-                quora_print_post($post, $discussion, $quora, $cm, $course, $ownpost, $reply, $link,
+                quora_print_post($post, $discussion, $quora, $cm, $course, $is_assessed, $ownpost, $reply, $link,
                                      '', '', $postread, true, $quoratracked);
             } else {
                 if (!quora_user_can_see_post($quora, $discussion, $post, NULL, $cm)) {
@@ -5736,7 +5769,7 @@ function quora_print_posts_threaded($course, &$cm, $quora, $discussion, $parent,
                 echo "</span>";
             }
 
-            quora_print_posts_threaded($course, $cm, $quora, $discussion, $post, $depth-1, $reply, $quoratracked, $posts);
+            quora_print_posts_threaded($course, $cm, $quora, $discussion, $post, $is_assessed, $depth-1, $reply, $quoratracked, $posts);
             echo "</div>\n";
         }
     }
@@ -5748,13 +5781,28 @@ function quora_print_posts_threaded($course, &$cm, $quora, $discussion, $parent,
  * @global object
  * @return void
  */
-function quora_print_posts_nested($course, &$cm, $quora, $discussion, $parent, $reply, $quoratracked, $posts) {
-    global $USER, $CFG;
+function quora_print_posts_nested($course, &$cm, $quora, $discussion, $parent, $is_assessed, $reply, $quoratracked, $posts) {
+    global $USER, $CFG, $DB;
 
     $link  = false;
 
     if (!empty($posts[$parent->id]->children)) {
         $posts = $posts[$parent->id]->children;
+        
+        //NighCool make the replys of the firstpost sorted by the number of assessments
+        if ($parent->id == $discussion->firstpost) {
+            $assess = array();
+            foreach ($posts as $post) {
+                $assess[$post->id] = count($DB->get_records('quora_post_assessments', array('post' => $post->id)));
+            }
+            arsort($assess);
+            $keys = array_keys($assess);
+            $new_posts = array();
+            foreach ($keys as $key) {
+                $new_posts[$key] = &$posts[$key];
+            }
+            $posts = $new_posts;
+        }
 
         foreach ($posts as $post) {
 
@@ -5767,10 +5815,11 @@ function quora_print_posts_nested($course, &$cm, $quora, $discussion, $parent, $
 
             $post->subject = format_string($post->subject);
             $postread = !empty($post->postread);
-
-            quora_print_post($post, $discussion, $quora, $cm, $course, $ownpost, $reply, $link,
+            
+            quora_print_post($post, $discussion, $quora, $cm, $course, $is_assessed, $ownpost, $reply, $link,
                                  '', '', $postread, true, $quoratracked);
-            quora_print_posts_nested($course, $cm, $quora, $discussion, $post, $reply, $quoratracked, $posts);
+            
+            quora_print_posts_nested($course, $cm, $quora, $discussion, $post, $is_assessed, $reply, $quoratracked, $posts);
             echo "</div>\n";
         }
     }

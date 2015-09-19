@@ -32,6 +32,9 @@ $mode   = optional_param('mode', 0, PARAM_INT);          // If set, changes the 
 $move   = optional_param('move', 0, PARAM_INT);          // If set, moves this discussion to another quora
 $mark   = optional_param('mark', '', PARAM_ALPHA);       // Used for tracking read posts if user initiated.
 $postid = optional_param('postid', 0, PARAM_INT);        // Used for tracking read posts if user initiated.
+$id     = optional_param('id', 0, PARAM_INT);            // param passed by assess action 
+$qid    = optional_param('qid', 0, PARAM_INT);           // param passed by assess action 
+$cid    = optional_param('cid', 0, PARAM_INT);           // param passed by assess action 
 
 $url = new moodle_url('/mod/quora/discuss.php', array('d'=>$d));
 if ($parent !== 0) {
@@ -58,7 +61,21 @@ if (!empty($CFG->enablerssfeeds) && !empty($CFG->quora_enablerssfeeds) && $quora
     $rsstitle = format_string($course->shortname, true, array('context' => context_course::instance($course->id))) . ': ' . format_string($quora->name);
     rss_add_http_header($modcontext, 'mod_quora', $quora, $rsstitle);
 }
-
+//add sign for the posts which has been praised by the user 
+if ($id > 0 && confirm_sesskey()) {
+    $assess = new stdClass();
+    $assess->course     = $cid;
+    $assess->quora      = $qid;
+    $assess->discussion = $d;
+    $assess->post       = $id;
+    $assess->userid     = $USER->id;
+    $DB->insert_record('quora_post_assessments', $assess);
+}
+$is_assessed = array();
+$assessments = $DB->get_records('quora_post_assessments', array('course' => $discussion->course, 'quora' => $discussion->quora,'discussion' => $d, 'userid' => $USER->id));
+foreach ($assessments as $assessment) {
+    $is_assessed[] = $assessment->post;
+}
 // Move discussion if requested.
 if ($move > 0 and confirm_sesskey()) {
     $return = $CFG->wwwroot.'/mod/quora/discuss.php?d='.$discussion->id;
@@ -353,7 +370,7 @@ if ($move == -1 and confirm_sesskey()) {
 }
 
 $canrate = has_capability('mod/quora:rate', $modcontext);
-quora_print_discussion($course, $cm, $quora, $discussion, $post, $displaymode, $canreply, $canrate);
+quora_print_discussion($course, $cm, $quora, $discussion, $post, $displaymode, $canreply, $canrate, $is_assessed);
 
 echo $neighbourlinks;
 
