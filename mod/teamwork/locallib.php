@@ -2953,6 +2953,23 @@ class teamwork_team_manage implements renderable {
 }
 
 /**
+ * Team manage page
+ *
+ * @author lkq
+ */
+class teamwork_myproject implements renderable {
+    /** @var int teamworkid */
+    public $teamwork;
+
+
+
+    public function __construct($teamwork) {
+        $this->teamwork = $teamwork;
+    }
+}
+
+
+/**
  * Represents the user planner tool
  *
  * Planner contains list of phases. Each phase contains list of tasks. Task is a simple object with

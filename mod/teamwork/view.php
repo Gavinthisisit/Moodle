@@ -130,12 +130,18 @@ if ($can_edit_templet) {
     $renderable = new teamwork_templet_list_manager($teamwork->id);
 }
 else if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
-   $renderable = new teamwork_templet_list_member($teamwork->id);
+	print_collapsible_region_start('', 'teamwork-myproject', get_string('myproject', 'teamwork'));
+	$renderable = new teamwork_myproject($teamwork->id);
+	echo $output->render($renderable);
+	print_collapsible_region_end();
+   	$renderable = new teamwork_templet_list_member($teamwork->id);
 }
 else {
     $renderable = new teamwork_templet_list($teamwork->id); 
 }
+print_collapsible_region_start('', 'teamwork-templetlist', get_string('templetlist', 'teamwork'));
 echo $output->render($renderable);
+print_collapsible_region_end();
 
 //display control buttons
 $renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader);

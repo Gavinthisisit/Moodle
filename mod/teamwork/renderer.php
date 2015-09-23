@@ -273,7 +273,67 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 
         return $o;
     }
-
+	
+	/**
+     * Renders my projects
+     *
+     * @author lkq
+     * @param teamwork_templet_list $list prepared for the user
+     * @return string html code to be displayed
+     */
+    protected function render_teamwork_myproject(teamwork_myproject $myproject) {
+    	global $DB,$USER;
+        $output .= html_writer::start_tag('div', array('class' => 'content'));
+        $takepartin = $DB->get_records('teamwork_teammembers',array('teamwork' => $myproject->teamwork,'userid' => $USER->id));
+        if(empty($takepartin)){
+        	$output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+            $output .= get_string('noprojects', 'teamwork');
+            $output .= html_writer::end_tag('div'); // .summary
+        }else{
+        	foreach($takepartin as $p){
+        		$teamid = $p->team;
+        		$p = $DB->get_record('teamwork_team',array('id' => $p->team));
+        		$p = $DB->get_record('teamwork_templet',array('id' => $p->templet));
+        		$output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
+                $output .= html_writer::start_tag('div', array('class' => 'info'));
+                $output .= html_writer::start_tag('h3', array('class' => 'coursename'));
+                $output .= $p->title;
+                $output .= html_writer::end_tag('h3'); // .name
+                $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
+                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+                
+                $output .= html_writer::end_tag('div');
+                $output .= html_writer::end_tag('div'); // .info
+                $output .= html_writer::start_tag('div', array('class' => 'content'));
+                $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+                $output .= $p->summary;
+                $output .= html_writer::end_tag('div'); // .summary
+                
+                $leader = $DB->get_record('teamwork_teammembers',array('id'=>$teamid,'leader'=>1));
+                $output .= html_writer::tag('leader', get_string('teamleader', 'teamwork'));
+                $leaderinfo = $DB->get_record('user',array('id'=>$leader->userid));
+                $output .= html_writer::start_tag('div', array('class' => 'leader')); // .leader
+	            $output .= $leaderinfo->lastname.$leaderinfo->firstname;
+	            $output .= html_writer::end_tag('div'); // .leader
+	            
+	            $members = $DB->get_records('teamwork_teammembers',array('id'=>$teamid,'leader'=>0));
+	            if(!empty($members)){
+	            	$output .= html_writer::tag('member', get_string('teammember', 'teamwork'));
+	            }
+	            foreach($members as $member){
+	            	$memberinfo = $DB->get_record('user',array('id'=>$member->userid));
+	                $output .= html_writer::start_tag('div', array('class' => 'member')); // .member
+		            $output .= $leaderinfo->lastname.$leaderinfo->firstname;
+		            $output .= html_writer::end_tag('div'); // .member
+	            }
+                
+                $output .= html_writer::end_tag('div'); // .content
+                $output .= html_writer::end_tag('div'); // .coursebox
+        	}
+        }
+        $output .= html_writer::end_tag('div'); // .content
+        return $output;
+	}
     /**
      * Renders the templet list
      *
@@ -282,11 +342,11 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list(teamwork_templet_list $list) {
-        global $DB;
+        global $DB,$USER;
         $teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
-        $output = '';
+        $output = '';      
         $output .= html_writer::start_tag('div', array('class' => 'content'));
-        $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        //$output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
         $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         if (! empty($list->container)) {
@@ -313,6 +373,19 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
                 $output .= $templet->summary;
                 $output .= html_writer::end_tag('div'); // .summary
+                
+                $output .= html_writer::start_tag('div', array('class' => 'teammember')); // .teammember
+	            $output .= get_string('teammembers', 'teamwork',$templet);
+	            $output .= html_writer::end_tag('div'); // .teammember
+	                
+	            $records = $DB->get_records('teamwork_team',array('teamwork'=>$templet->teamwork,'templet'=>$templet->id));
+	            $temp = new stdClass();
+	            $temp->teamnum = count($records);
+	            $temp->teamlimit = $templet->teamlimit;
+	            $output .= html_writer::start_tag('div', array('class' => 'teamlimit')); // .teamlimit
+	            $output .= get_string('teamlimits', 'teamwork',$temp);
+	            $output .= html_writer::end_tag('div'); // .teamlimit
+                
                 $output .= html_writer::end_tag('div'); // .content
                 $output .= html_writer::end_tag('div'); // .coursebox
             }
@@ -366,11 +439,11 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string html code to be displayed
      */
     protected function render_teamwork_templet_list_member(teamwork_templet_list_member $list) {
-    	global $DB;
+    	global $DB,$USER;
     	$teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
-        $output = '';
+        $output = '';   
         $output .= html_writer::start_tag('div', array('class' => 'content'));
-        $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        //$output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
         $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         //var_dump($list->url);
@@ -394,6 +467,19 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
                 $output .= $templet->summary;
                 $output .= html_writer::end_tag('div'); // .summary
+                
+                $output .= html_writer::start_tag('div', array('class' => 'teammember')); // .teammember
+		        $output .= get_string('teammembers', 'teamwork',$templet);
+		        $output .= html_writer::end_tag('div'); // .teammember
+		            
+		        $records = $DB->get_records('teamwork_team',array('teamwork'=>$templet->teamwork,'templet'=>$templet->id));
+		        $temp = new stdClass();
+		        $temp->teamnum = count($records);
+		        $temp->teamlimit = $templet->teamlimit;
+		        $output .= html_writer::start_tag('div', array('class' => 'teamlimit')); // .teamlimit
+		        $output .= get_string('teamlimits', 'teamwork',$temp);
+		        $output .= html_writer::end_tag('div'); // .teamlimit
+                
                 $output .= html_writer::end_tag('div'); // .content
                 $output .= html_writer::end_tag('div'); // .coursebox
             }
@@ -403,7 +489,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $output .= html_writer::start_tag('div', array('class' => 'content'));
             $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
             $output .= get_string('noprojects', 'teamwork');
-            $output .= html_writer::end_tag('div'); // .summary
+            $output .= html_writer::end_tag('div'); // .summary            
             $output .= html_writer::end_tag('div'); // .content
             $output .= html_writer::end_tag('div'); // .coursebox
         }
@@ -424,7 +510,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     	$teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'content'));
-        $output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+        //$output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
         $output .= html_writer::tag('font', get_string('applystart', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applystart).'<br>'.get_string('applyend', 'teamwork').': '.date("Y.m.d H:i:s",$teamwork->applyend),array('color' => '#FF0000'));
         $output .= html_writer::start_tag('div', array('class' => 'templet'));
         //var_dump($list->url);
@@ -433,7 +519,9 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
                 $output .= html_writer::start_tag('div', array('class' => 'info'));
                 $output .= html_writer::start_tag('h3', array('class' => 'coursename'));
+                $output .= html_writer::start_tag('a', array('href' => "team_manage.php?w=$list->teamwork&view=$templet->id"));
                 $output .= $templet->title;
+                $output .= html_writer::end_tag('a'); // .name
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
                 $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
@@ -448,6 +536,19 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
                 $output .= $templet->summary;
                 $output .= html_writer::end_tag('div'); // .summary
+                
+                $output .= html_writer::start_tag('div', array('class' => 'teammember')); // .teammember
+                $output .= get_string('teammembers', 'teamwork',$templet);
+                $output .= html_writer::end_tag('div'); // .teammember
+                
+                $records = $DB->get_records('teamwork_team',array('teamwork'=>$templet->teamwork,'templet'=>$templet->id));
+                $temp = new stdClass();
+                $temp->teamnum = count($records);
+                $temp->teamlimit = $templet->teamlimit;
+                $output .= html_writer::start_tag('div', array('class' => 'teamlimit')); // .teamlimit
+                $output .= get_string('teamlimits', 'teamwork',$temp);
+                $output .= html_writer::end_tag('div'); // .teamlimit
+                
                 $output .= html_writer::end_tag('div'); // .content
                 $output .= html_writer::end_tag('div'); // .coursebox
             }
