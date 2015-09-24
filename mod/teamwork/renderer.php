@@ -309,21 +309,22 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= $p->summary;
                 $output .= html_writer::end_tag('div'); // .summary
                 
-                $leader = $DB->get_record('teamwork_teammembers',array('id'=>$teamid,'leader'=>1));
+                $leader = $DB->get_record('teamwork_teammembers',array('team'=>$teamid,'leader'=>1));
+                //var_dump($teamid);die;
                 $output .= html_writer::tag('leader', get_string('teamleader', 'teamwork'));
                 $leaderinfo = $DB->get_record('user',array('id'=>$leader->userid));
                 $output .= html_writer::start_tag('div', array('class' => 'leader')); // .leader
 	            $output .= $leaderinfo->lastname.$leaderinfo->firstname;
 	            $output .= html_writer::end_tag('div'); // .leader
 	            
-	            $members = $DB->get_records('teamwork_teammembers',array('id'=>$teamid,'leader'=>0));
+	            $members = $DB->get_records('teamwork_teammembers',array('team'=>$teamid,'leader'=>0));
 	            if(!empty($members)){
 	            	$output .= html_writer::tag('member', get_string('teammember', 'teamwork'));
 	            }
 	            foreach($members as $member){
 	            	$memberinfo = $DB->get_record('user',array('id'=>$member->userid));
 	                $output .= html_writer::start_tag('div', array('class' => 'member')); // .member
-		            $output .= $leaderinfo->lastname.$leaderinfo->firstname;
+		            $output .= $memberinfo->lastname.$memberinfo->firstname;
 		            $output .= html_writer::end_tag('div'); // .member
 	            }
                 
@@ -414,12 +415,11 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     protected function render_teamwork_templet_buttons(teamwork_templet_buttons $conf) {
         $output = '';
         $output .= html_writer::start_tag('div', array('class' => 'buttons'));
-        //var_dump($conf); die;
         if ($conf->create_templet) {
             $add_btn = get_string('addproject', 'teamwork');
             $output .= $this->single_button("templet_edit.php?id=$conf->teamwork", $add_btn, 'post');
         }
-        else {
+        else if ($conf->can_join){
             $add_btn = get_string('joininteam', 'teamwork');
             $output .= $this->single_button("jointeam.php?teamworkid=$conf->teamwork", $add_btn, 'post');
         }

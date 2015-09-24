@@ -2884,6 +2884,8 @@ class teamwork_templet_buttons implements renderable {
     /** @var bool capability of edit team info*/
     public $edit_team_info;
 
+    public $can_join;
+
     /**
      * Prepare a buttons view for the given messages.
      *
@@ -2892,11 +2894,12 @@ class teamwork_templet_buttons implements renderable {
      * @param bool $create_templet
      * @param bool $edit_team_info 
      */
-    public function __construct($teamwork, $teamid, $create_templet, $edit_team_info) {
+    public function __construct($teamwork, $teamid, $create_templet, $edit_team_info, $can_join) {
         $this->teamwork = $teamwork;
         $this->teamid = $teamid;
         $this->create_templet = $create_templet;
         $this->edit_team_info = $edit_team_info;
+        $this->can_join = $can_join;
     }
 }
 

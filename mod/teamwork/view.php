@@ -125,15 +125,20 @@ if (has_capability('mod/teamwork:editsettings', $PAGE->context)) {
 else {
     $can_edit_templet = false;
 }
-
+$can_join_team = true;
+if (count($teammember_records) >= $teamworkrecord->participationnumlimit) {
+    $can_join_team = false;
+}
+if (count($teammember_records) > 0) {
+    print_collapsible_region_start('', 'teamwork-myproject', get_string('myproject', 'teamwork'));
+    $renderable = new teamwork_myproject($teamwork->id);
+    echo $output->render($renderable);
+    print_collapsible_region_end();
+}
 if ($can_edit_templet) {
     $renderable = new teamwork_templet_list_manager($teamwork->id);
 }
-else if (count($teammember_records) >= $teamworkrecord->participationnumlimit || $is_team_leader) {
-	print_collapsible_region_start('', 'teamwork-myproject', get_string('myproject', 'teamwork'));
-	$renderable = new teamwork_myproject($teamwork->id);
-	echo $output->render($renderable);
-	print_collapsible_region_end();
+else if ((!$can_join_team) || $is_team_leader) {
    	$renderable = new teamwork_templet_list_member($teamwork->id);
 }
 else {
@@ -144,7 +149,7 @@ echo $output->render($renderable);
 print_collapsible_region_end();
 
 //display control buttons
-$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader);
+$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader, $can_join_team);
 echo $output->render($renderable);
 
 //echo $output->render($userplan);
