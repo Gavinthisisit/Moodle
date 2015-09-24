@@ -87,5 +87,5 @@ foreach ($workshops as $workshop) {
     }
 }
 echo $OUTPUT->heading(get_string('modulenameplural', 'workshop'), 3);
-//echo html_writer::table($table);
+echo html_writer::table($table);
 echo $OUTPUT->footer();
