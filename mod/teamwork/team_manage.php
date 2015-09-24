@@ -35,6 +35,7 @@ $w          = optional_param('w', 0, PARAM_INT);  // teamwork instance ID
 $templetid  = optional_param('templetid', 0, PARAM_INT);
 $teamid  = optional_param('teamid', 0, PARAM_INT);
 $memberid  = optional_param('remove', 0, PARAM_INT);
+$templetview = optional_param('view', 0, PARAM_INT);
 
 if ($id) {
     $cm             = get_coursemodule_from_id('teamwork', $id, 0, false, MUST_EXIST);
@@ -47,38 +48,57 @@ if ($id) {
 }
 
 require_login($course, true, $cm);
-require_capability('mod/teamwork:view', $PAGE->context);
-$teamleader_record = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id, 'teamwork' => $w,'leader' => 1));
-if(empty($teamleader_record)){
-	redirect("view.php?id=$cm->id");
-}
+if($templetview!=0){
+	require_capability('mod/teamwork:editsettings', $PAGE->context);
 
-if(!empty($teamid) && !empty($memberid) && !empty($teamleader_record)){
-	if($teamleader_record->team == $teamid)	{
-		if($teamleader_record->userid == $memberid){
-			$DB->delete_records('teamwork_team',array('leader'=>$memberid,'teamwork'=> $w));
-		}
-		$DB->delete_records('teamwork_teammembers',array('userid'=>$memberid,'team'=>$teamid,'teamwork'=> $w));
+	$PAGE->set_title(get_string('viewteaminfo', 'teamwork'));
+	$PAGE->set_heading($course->fullname);	
+	$output = $PAGE->get_renderer('mod_teamwork');
+	echo $output->header();
+	
+	$teams = $DB->get_records('teamwork_team', array('templet' => $templetview, 'teamwork' => $w));
+	foreach($teams as $team){
+		print_collapsible_region_start('', 'teamwork-info-'.$team->id, $team->name);
+		$renderable = new teamwork_team_manage($w, $team->id);
+		echo $output->render($renderable);
+		print_collapsible_region_end();
 	}
+	echo $output->footer();
+}else{
+	require_capability('mod/teamwork:view', $PAGE->context);
+	$teamleader_record = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id, 'teamwork' => $w,'leader' => 1));
+	if(empty($teamleader_record)){
+		redirect("view.php?id=$cm->id");
+	}
+	
+	if(!empty($teamid) && !empty($memberid) && !empty($teamleader_record)){
+		if($teamleader_record->team == $teamid)	{
+			if($teamleader_record->userid == $memberid){
+				$DB->delete_records('teamwork_team',array('leader'=>$memberid,'teamwork'=> $w));
+			}
+			$DB->delete_records('teamwork_teammembers',array('userid'=>$memberid,'team'=>$teamid,'teamwork'=> $w));
+		}
+	}
+	$teamid = $teamleader_record->team;
+	$PAGE->set_title(get_string('editteaminfo', 'teamwork'));
+	$PAGE->set_heading($course->fullname);
+	
+	$output = $PAGE->get_renderer('mod_teamwork');
+	
+	/// Output starts here
+	
+	echo $output->header();
+	
+	print_collapsible_region_start('', 'teamwork-invitedkey', get_string('invitedkey', 'teamwork'));
+	$renderable = new teamwork_team_invitedkey($w, $teamid);
+	echo $output->render($renderable);
+	print_collapsible_region_end();
+	
+	print_collapsible_region_start('', 'teamwork-editteaminfo', get_string('editteaminfo', 'teamwork'));
+	$renderable = new teamwork_team_manage($w, $teamid);
+	echo $output->render($renderable);
+	print_collapsible_region_end();
+	
+	echo $output->footer();
 }
-$teamid = $teamleader_record->team;
-$PAGE->set_title(get_string('editteaminfo', 'teamwork'));
-$PAGE->set_heading($course->fullname);
 
-$output = $PAGE->get_renderer('mod_teamwork');
-
-/// Output starts here
-
-echo $output->header();
-
-print_collapsible_region_start('', 'teamwork-invitedkey', get_string('invitedkey', 'teamwork'));
-$renderable = new teamwork_team_invitedkey($w, $teamid);
-echo $output->render($renderable);
-print_collapsible_region_end();
-
-print_collapsible_region_start('', 'teamwork-editteaminfo', get_string('editteaminfo', 'teamwork'));
-$renderable = new teamwork_team_manage($w, $teamid);
-echo $output->render($renderable);
-print_collapsible_region_end();
-
-echo $output->footer();
