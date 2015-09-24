@@ -75,8 +75,11 @@ if($templetview!=0){
 		if($teamleader_record->team == $teamid)	{
 			if($teamleader_record->userid == $memberid){
 				$DB->delete_records('teamwork_team',array('leader'=>$memberid,'teamwork'=> $w));
+				$DB->delete_records('teamwork_teammembers',array('team'=>$teamid,'teamwork'=> $w));
 			}
-			$DB->delete_records('teamwork_teammembers',array('userid'=>$memberid,'team'=>$teamid,'teamwork'=> $w));
+			else {
+				$DB->delete_records('teamwork_teammembers',array('userid'=>$memberid,'team'=>$teamid,'teamwork'=> $w));
+			}
 		}
 	}
 	$teamid = $teamleader_record->team;
