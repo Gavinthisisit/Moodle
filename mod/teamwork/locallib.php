@@ -4117,3 +4117,35 @@ class teamwork_final_grades implements renderable {
     /** @var object the infor from the gradebook about the grade for assessment */
     public $assessmentgrade = null;
 }
+
+/**
+ * Generate project instanses from the templet
+ */
+function generate_instanse_from_templet($teamwork) {
+	global $DB;
+	
+	remove_incomplete_team($teamwork);
+	$teams = $DB->get_records('teamwork_team',array('teamwork' => $teamwork));
+	foreach($teams as $team) {
+		$templet = $DB->get_record('teamwork_templet',array('id' => $team->templet));
+		unset($templet->id);
+		$templet->team = $team->id;
+		$DB->insert_record('teamwork_instance',$templet);
+	}
+}
+
+/**
+ * Remove incomplete teams for templet
+ */
+function remove_incomplete_team($teamwork) {
+	global $DB;
+	$teams = $DB->get_records('teamwork_team',array('teamwork' => $teamwork));
+	foreach($teams as $team) {
+		$membermin = $DB->get_record('teamwork_templet',array('id' => $team->templet))->teamminmember;
+		$membernum = count($DB->get_records('teamwork_teammembers',array('team' => $team->id)));
+		if($membernum < $membermin) {
+			$DB->delete_records('teamwork_teammembers',array('team' => $team->id));
+			$DB->delete_records('teamwork_team',array('id' => $team->id));
+		}
+	}
+} 
