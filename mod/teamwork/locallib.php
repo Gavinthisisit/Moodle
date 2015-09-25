@@ -4128,9 +4128,17 @@ function generate_instanse_from_templet($teamwork) {
 	$teams = $DB->get_records('teamwork_team',array('teamwork' => $teamwork));
 	foreach($teams as $team) {
 		$templet = $DB->get_record('teamwork_templet',array('id' => $team->templet));
+		$phases = $DB->get_records('teamwork_templet_phase',array('templet' => $templet->id));
 		unset($templet->id);
 		$templet->team = $team->id;
-		$DB->insert_record('teamwork_instance',$templet);
+		$instanceid = $DB->insert_record('teamwork_instance',$templet);
+		foreach($phases as $phase) {
+			unset($phase->id);
+			unset($phase->templet);
+			$phase->instance = $instanceid;
+			$DB->insert_record('teamwork_instance_phase',$phase);
+		}
+		
 	}
 }
 
