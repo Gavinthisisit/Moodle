@@ -375,3 +375,5 @@ $string['myproject'] = 'My Project';
 $string['teamleader'] = 'Leader:';
 $string['teammember'] = 'Members:';
 $string['viewteaminfo'] = 'View Team Information';
+$string['mytasks'] = 'My Task';
+$string['teamlist'] = 'Team List';

@@ -367,3 +367,5 @@ $string['myproject'] = '我的项目';
 $string['teamleader'] = '队长：';
 $string['teammember'] = '成员：';
 $string['viewteaminfo'] = '查看团队信息';
+$string['mytasks'] = '我的任务';
+$string['teamlist'] = '团队列表';

@@ -140,13 +140,13 @@ class teamwork {
     public $submissionend;
 
     /** @var int if greater than 0 then the peer assessment is not allowed before this timestamp */
-    public $assessmentstart;
+    public $applystart;
 
     /** @var int if greater than 0 then the peer assessment is not allowed after this timestamp */
-    public $assessmentend;
+    public $applyend;
 
     /** @var bool automatically switch to the assessment phase after the submissions deadline */
-    public $phaseswitchassessment;
+    public $applyover;
 
     /** @var string conclusion text to be displayed at the end of the activity */
     public $conclusion;
