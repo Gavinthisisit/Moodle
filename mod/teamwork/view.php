@@ -89,6 +89,7 @@ $output = $PAGE->get_renderer('mod_teamwork');
 
 echo $output->header();
 
+// Output tabs here
 ob_start();
 include($CFG->dirroot.'/mod/teamwork/tabs.php');
 $output_tab = ob_get_contents();
