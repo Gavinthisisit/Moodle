@@ -358,17 +358,21 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= $templet->title;
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
-                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                $std_btn = new stdClass();
-                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
-                $std_btn->str = get_string('createteam', 'teamwork');
-                $std_btn->method = 'post';
-                $std_btn->actions = array();
-                if (count($DB->get_records('teamwork_team', array('templet' => $templet->id))) >= $templet->teamlimit) {
-                    $std_btn->actions['disabled'] = true;
+                
+                if($teamwork->applyover == 0){
+                	$output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+                	$std_btn = new stdClass();
+	                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
+	                $std_btn->str = get_string('createteam', 'teamwork');
+	                $std_btn->method = 'post';
+	                $std_btn->actions = array();
+	                if (count($DB->get_records('teamwork_team', array('templet' => $templet->id))) >= $templet->teamlimit) {
+	                    $std_btn->actions['disabled'] = true;
+	                }
+	                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, $std_btn->actions);
+	                $output .= html_writer::end_tag('div');
                 }
-                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, $std_btn->actions);
-                $output .= html_writer::end_tag('div');
+                
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
@@ -455,13 +459,15 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= $templet->title;
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
-                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                $std_btn = new stdClass();
-                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
-                $std_btn->str = get_string('createteam', 'teamwork');
-                $std_btn->method = 'post';
-                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, array('disabled' => true));
-                $output .= html_writer::end_tag('div');
+                if($teamwork->applyover == 0){
+	                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+	                $std_btn = new stdClass();
+	                $std_btn->url = new moodle_url('team_edit.php',array('templetid' => $templet->id, 'teamworkid' => $list->teamwork));
+	                $std_btn->str = get_string('createteam', 'teamwork');
+	                $std_btn->method = 'post';
+	                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method, array('disabled' => true));
+	                $output .= html_writer::end_tag('div');
+            	}
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
@@ -524,13 +530,16 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('a'); // .name
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
-                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-                $std_btn = new stdClass();
-                $std_btn->url = new moodle_url('templet_edit.php',array('id' => $list->teamwork, 'update' => $templet->id));
-                $std_btn->str = get_string('edittemplet', 'teamwork');
-                $std_btn->method = 'post';
-                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method);
-                $output .= html_writer::end_tag('div');
+                if($teamwork->applyover == 0){
+	                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+	                $std_btn = new stdClass();
+	                $std_btn->url = new moodle_url('templet_edit.php',array('id' => $list->teamwork, 'update' => $templet->id));
+	                $std_btn->str = get_string('edittemplet', 'teamwork');
+	                $std_btn->method = 'post';
+	                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method);
+	                $output .= html_writer::end_tag('div');
+            	}
+                
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));
                 $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary

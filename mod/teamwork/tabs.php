@@ -36,7 +36,11 @@ $row[] = new tabobject('templetlist', "$CFG->wwwroot/mod/teamwork/view.php?w=$te
 $row[] = new tabobject('teamlist', "$CFG->wwwroot/mod/teamwork/teamlist.php?w=$teamwork->id", get_string('teamlist', 'teamwork'), get_string('teamlist', 'teamwork'));
 
 $tabs[] = $row;
-$inactive = array('templetlist');
-$activated = array('templetlist');
-
+$inactive = $activated = array();
+$inactive[] = 'templetlist';
+$activated[] = 'templetlist';
+if($teamwork->applyover == 0) {
+	$inactive[] = 'mytasks';
+	$inactive[] = 'teamlist';
+}
 print_tabs($tabs, $currenttab, $inactive, $activated);
