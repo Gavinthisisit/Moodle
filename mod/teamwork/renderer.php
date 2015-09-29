@@ -623,10 +623,28 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'userplan';
         $table->head = array();
         $table->colclasses = array();
-        $row = new html_table_row();
-        $row->attributes['class'] = 'phasetasks';
-        foreach ($plan->phases as $phasecode => $phase) {
-            $title = html_writer::tag('span', $phase->title);
+        $row = array();
+        foreach($plan->instance as $id => $instance) {
+        	$row[$id] = new html_table_row();
+        	$row[$id]->attributes['class'] = 'phasetasks';
+        	foreach ($instance->phases as $phasecode => $phase) {
+        		$title = html_writer::tag('span', $phase->name);
+        		$table->head[] = $this->output->container($title);
+        		$classes = 'phase' . $phasecode;
+        		if($instance->currentphase == $phasecode) {
+        			$classes .= ' active';
+        		}else {
+        			$classes .= ' nonactive';
+        		}
+                
+            	$table->colclasses[] = $classes;
+        		$cell = new html_table_cell();
+        		$cell->text = get_string('phasedescription','teamwork').':'.$phase->description;
+            	$row[$id]->cells[] = $cell;
+        	}
+		}
+		/*        foreach ($plan->phases as $phasecode => $phase) {
+            $title = html_writer::tag('span', $phase->name);
             $actions = '';
             foreach ($phase->actions as $action) {
                 switch ($action->type) {
@@ -655,8 +673,8 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $cell = new html_table_cell();
             $cell->text = $this->helper_user_plan_tasks($phase->tasks);
             $row->cells[] = $cell;
-        }
-        $table->data = array($row);
+        }*/
+        $table->data = $row;
 
         return html_writer::table($table);
     }
