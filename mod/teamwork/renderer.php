@@ -36,7 +36,57 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     ////////////////////////////////////////////////////////////////////////////
     // External API - methods to render teamwork renderable components
     ////////////////////////////////////////////////////////////////////////////
+	
+	
+	    /**
+     * Renders the user plannner tool
+     *
+     * @param teamwork_user_plan $plan prepared for the user
+     * @return string html code to be displayed
+     */
+    protected function render_teamwork_team_info(teamwork_team_info $plan) {
+        $table = new html_table();
+        $table->attributes['class'] = 'userplan';
+        $table->head = array();
+        $table->colclasses = array();
+        $row = new html_table_row();
+        $row->attributes['class'] = 'phasetasks';
+        foreach ($plan->phases as $phasecode => $phase) {
+            $title = html_writer::tag('span', $phase->title);
+            $actions = '';
+            foreach ($phase->actions as $action) {
+                switch ($action->type) {
+                case 'switchphase':
+                    $icon = 'i/marker';
+                    if ($phasecode == teamwork::PHASE_ASSESSMENT
+                            and $plan->teamwork->phase == teamwork::PHASE_SUBMISSION
+                            and $plan->teamwork->phaseswitchassessment) {
+                        $icon = 'i/scheduled';
+                    }
+                    $actions .= $this->output->action_icon($action->url, new pix_icon($icon, get_string('switchphase', 'teamwork')));
+                    break;
+                }
+            }
+            if (!empty($actions)) {
+                $actions = $this->output->container($actions, 'actions');
+            }
+            $table->head[] = $this->output->container($title . $actions);
+            $classes = 'phase' . $phasecode;
+            if ($phase->active) {
+                $classes .= ' active';
+            } else {
+                $classes .= ' nonactive';
+            }
+            $table->colclasses[] = $classes;
+            $cell = new html_table_cell();
+            $cell->text = $this->helper_team_info_tasks($phase->tasks);
+            $row->cells[] = $cell;
+        }
+        $table->data = array($row);
 
+        return html_writer::table($table);
+    }
+	
     /**
      * Renders teamwork message
      *
@@ -155,6 +205,67 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @return string text to be echo'ed
      */
     protected function render_teamwork_submission_summary(teamwork_submission_summary $summary) {
+
+        $o  = '';    // output HTML code
+        $anonymous = $summary->is_anonymous();
+        $classes = 'submission-summary';
+
+        if ($anonymous) {
+            $classes .= ' anonymous';
+        }
+
+        $gradestatus = '';
+
+        if ($summary->status == 'notgraded') {
+            $classes    .= ' notgraded';
+            $gradestatus = $this->output->container(get_string('nogradeyet', 'teamwork'), 'grade-status');
+
+        } else if ($summary->status == 'graded') {
+            $classes    .= ' graded';
+            $gradestatus = $this->output->container(get_string('alreadygraded', 'teamwork'), 'grade-status');
+        }
+
+        $o .= $this->output->container_start($classes);  // main wrapper
+        $o .= html_writer::link($summary->url, format_string($summary->title), array('class' => 'title'));
+
+        if (!$anonymous) {
+            $author             = new stdClass();
+            $additionalfields = explode(',', user_picture::fields());
+            $author = username_load_fields_from_object($author, $summary, 'author', $additionalfields);
+            $userpic            = $this->output->user_picture($author, array('courseid' => $this->page->course->id, 'size' => 35));
+            $userurl            = new moodle_url('/user/view.php',
+                                            array('id' => $author->id, 'course' => $this->page->course->id));
+            $a                  = new stdClass();
+            $a->name            = fullname($author);
+            $a->url             = $userurl->out();
+            $byfullname         = get_string('byfullname', 'teamwork', $a);
+
+            $oo  = $this->output->container($userpic, 'picture');
+            $oo .= $this->output->container($byfullname, 'fullname');
+            $o  .= $this->output->container($oo, 'author');
+        }
+
+        $created = get_string('userdatecreated', 'teamwork', userdate($summary->timecreated));
+        $o .= $this->output->container($created, 'userdate created');
+
+        if ($summary->timemodified > $summary->timecreated) {
+            $modified = get_string('userdatemodified', 'teamwork', userdate($summary->timemodified));
+            $o .= $this->output->container($modified, 'userdate modified');
+        }
+
+        $o .= $gradestatus;
+        $o .= $this->output->container_end(); // end of the main wrapper
+        return $o;
+    }
+
+
+    /**
+     * Renders short summary of the submission
+     *
+     * @param teamwork_submission_summary $summary
+     * @return string text to be echo'ed
+     */
+    protected function render_teamwork_forum_summary(teamwork_forum_summary $summary) {
 
         $o  = '';    // output HTML code
         $anonymous = $summary->is_anonymous();
@@ -335,6 +446,60 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $output .= html_writer::end_tag('div'); // .content
         return $output;
 	}
+	/**
+     * Renders the team list
+     *
+     * @author lkq
+     * @param teamwork_team_list $list prepared for the user
+     * @return string html code to be displayed
+     */
+	protected function render_teamwork_team_list(teamwork_team_list $list) {
+        global $DB,$USER;
+        $teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
+        $output = '';      
+        $output .= html_writer::start_tag('div', array('class' => 'content'));
+        //$output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
+
+        $output .= html_writer::start_tag('div', array('class' => 'instance'));
+        if (! empty($list->container)) {
+            foreach ($list->container as $id => $instance) {
+                $team_instance = $DB->get_record('teamwork_team',array('id'=>$instance->team));
+
+                $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
+                $output .= html_writer::start_tag('div', array('class' => 'info'));
+                $output .= html_writer::start_tag('h3', array('class' => 'coursename'));
+                $output .= html_writer::start_tag('a', array('href' => "project.php?w=$list->teamwork&instance=$instance->id"));
+                $output .= $instance->title.'@'.$team_instance->name;
+                $output .= html_writer::end_tag('a');
+                $output .= html_writer::end_tag('h3'); // .name
+                $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
+                
+
+                
+                $output .= html_writer::end_tag('div'); // .info
+                $output .= html_writer::start_tag('div', array('class' => 'content'));
+                $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+                $output .= $instance->summary;
+                $output .= html_writer::end_tag('div'); // .summary
+
+                $output .= html_writer::end_tag('div'); // .content
+                $output .= html_writer::end_tag('div'); // .coursebox
+            }
+        }
+        else {
+            $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
+            $output .= html_writer::start_tag('div', array('class' => 'content'));
+            $output .= html_writer::start_tag('div', array('class' => 'summary')); // .summary
+            $output .= get_string('noprojects', 'teamwork');
+            $output .= html_writer::end_tag('div'); // .summary
+            $output .= html_writer::end_tag('div'); // .content
+            $output .= html_writer::end_tag('div'); // .coursebox
+        }
+        $output .= html_writer::end_tag('div');
+        $output .= html_writer::end_tag('div');
+        return $output;
+    }
+    
     /**
      * Renders the templet list
      *
@@ -590,19 +755,25 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 		global $DB;
     	$teammembers = $DB->get_records('teamwork_teammembers',array('teamwork' => $teammanage->teamwork,'team' =>$teammanage->teamid));
 		$table = new html_table();
-		$table->head = array(get_string('name','teamwork'),get_string('jointime','teamwork'),get_string('removemember','teamwork'));	
+		$table->head = array(get_string('name','teamwork'),get_string('jointime','teamwork'),get_string('activitysituation','teamwork'),get_string('removemember','teamwork'));	
 		$rowarray = array();
 		
 		foreach($teammembers as $member){
 			$row = new html_table_row();
 			$cell1 = new html_table_cell();
 			$cell2 = new html_table_cell();
+			$cell3 = new html_table_cell();
 			$icon = 't/delete';
 			$member_record = $DB->get_record('user',array('id'=>$member->userid));
-        	$cell1->text = $member_record->lastname.$member_record->firstname;
+			$a = array();
+			exec("python sql.py acti ".$member->userid,$a,$b);
+			$cell_name = html_writer::link($task->link, $member_record->lastname.$member_record->firstname);
+        	$cell1->text = $cell_name;
         	$cell2->text = date("Y.m.d H:i:s",$member->time);
+			$cell3->text = $a[0];
         	$row->cells[] = $cell1;
-        	$row->cells[] = $cell2; 
+        	$row->cells[] = $cell2;
+			$row->cells[] = $cell3;
         	$row->cells[] = $this->output->action_icon("team_manage.php?w=$teammanage->teamwork&teamid=$teammanage->teamid&remove=$member->userid", new pix_icon($icon, get_string('removemember', 'teamwork')));
         
         	$rowarray[] = $row;
@@ -1260,6 +1431,41 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             return $outputfiles;
         }
     }
+
+    /**
+     * Renders the tasks for the single phase in the user plan
+     *
+     * @param stdClass $tasks
+     * @return string html code
+     */
+    protected function helper_team_info_tasks(array $tasks) {
+        $out = '';
+        foreach ($tasks as $taskcode => $task) {
+            $classes = '';
+            $icon = null;
+            if ($task->completed === true) {
+                $classes .= ' completed';
+            } elseif ($task->completed === false) {
+                $classes .= ' fail';
+            } elseif ($task->completed === 'info') {
+                $classes .= ' info';
+            }
+            if (is_null($task->link)) {
+                $title = $task->title;
+            } else {
+                $title = html_writer::link($task->link, $task->title);
+            }
+			$s = $task->details;
+            $title = $this->output->container($title.$s, 'title');
+            
+            $out .= html_writer::tag('li', $title, array('class' => $classes));
+        }
+        if ($out) {
+            $out = html_writer::tag('ul', $out, array('class' => 'tasks'));
+        }
+        return $out;
+    }
+
 
     /**
      * Renders the tasks for the single phase in the user plan

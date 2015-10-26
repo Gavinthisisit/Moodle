@@ -699,7 +699,19 @@ class teamwork {
 
         return $DB->count_records_sql($sql, $params);
     }
+	
+	public function count_instance_submissions($instance) {
+        global $DB;
 
+        $params = array('teamworkid' => $this->id);
+        $sql = "SELECT COUNT(s.id)
+                  FROM {teamwork_submissions} s
+                  JOIN {user} u ON (s.authorid = u.id)";
+
+        $sql .= " WHERE s.instance = $instance AND s.teamworkid = :teamworkid";
+
+        return $DB->count_records_sql($sql, $params);
+    }
 
     /**
      * Returns submissions from this teamwork
@@ -721,7 +733,7 @@ class teamwork {
         $gradeoverbyfields = user_picture::fields('t', null, 'gradeoverbyx', 'over');
         $params            = array('teamworkid' => $this->id);
         $sql = "SELECT s.id, s.teamworkid, s.example, s.authorid, s.timecreated, s.timemodified,
-                       s.title, s.grade, s.gradeover, s.gradeoverby, s.published,
+                       s.title, s.grade, s.gradeover, s.gradeoverby, s.published, s.instance,
                        $authorfields, $gradeoverbyfields
                   FROM {teamwork_submissions} s
                   JOIN {user} u ON (s.authorid = u.id)";
@@ -748,6 +760,27 @@ class teamwork {
         return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
     }
 
+	public function get_instance_submissions($instanceid, $limitfrom=0, $limitnum=0) {
+        global $DB;
+
+        $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
+        $gradeoverbyfields = user_picture::fields('t', null, 'gradeoverbyx', 'over');
+        $params            = array('teamworkid' => $this->id);
+        $sql = "SELECT s.id, s.teamworkid, s.example, s.authorid, s.timecreated, s.timemodified,
+                       s.title, s.grade, s.gradeover, s.gradeoverby, s.published, s.instance,
+                       $authorfields, $gradeoverbyfields
+                  FROM {teamwork_submissions} s
+                  JOIN {user} u ON (s.authorid = u.id)";
+
+        $sql .= " LEFT JOIN {user} t ON (s.gradeoverby = t.id)
+                 WHERE s.instance = $instanceid AND s.teamworkid = :teamworkid";
+
+        list($sort, $sortparams) = users_order_by_sql('u');
+        $sql .= " ORDER BY $sort";
+
+        return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
+    }
+    
     /**
      * Returns a submission record with the author's data
      *
@@ -875,7 +908,7 @@ class teamwork {
     public function prepare_submission(stdClass $record, $showauthor = false) {
 
         $submission         = new teamwork_submission($this, $record, $showauthor);
-        $submission->url    = $this->submission_url($record->id);
+        $submission->url    = new moodle_url('/mod/teamwork/submission.php',array('teamwork' => $record->teamworkid, 'instance' => $record->instance, 'id' => $record->id));
 
         return $submission;
     }
@@ -890,11 +923,26 @@ class teamwork {
     public function prepare_submission_summary(stdClass $record, $showauthor = false) {
 
         $summary        = new teamwork_submission_summary($this, $record, $showauthor);
-        $summary->url   = $this->submission_url($record->id);
+        $summary->url   = new moodle_url('/mod/teamwork/submission.php',array('teamwork' => $record->teamworkid, 'instance' => $record->instance, 'id' => $record->id));
 
         return $summary;
     }
 
+	/**
+     * Prepares renderable submission summary component
+     *
+     * @param stdClass $record required by {@see teamwork_submission_summary}
+     * @param bool $showauthor show the author-related information
+     * @return teamwork_submission_summary
+     */
+    public function prepare_forum_summary(stdClass $record, $showauthor = false) {
+
+        $summary        = new teamwork_forum_summary($this, $record, $showauthor);
+        $summary->url   = new moodle_url('/mod/teamwork/forum/discuss.php',array('d' => $record->discussid));
+
+        return $summary;
+    }
+    
     /**
      * Prepares renderable example submission component
      *
@@ -2783,6 +2831,242 @@ class teamwork {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Represents the user planner tool
+ *
+ * Planner contains list of phases. Each phase contains list of tasks. Task is a simple object with
+ * title, link and completed (true/false/null logic).
+ */
+class teamwork_team_info implements renderable {
+
+    /** @var int id of the user this plan is for */
+    public $teamid;
+    /** @var teamwork */
+    public $teamwork;
+    /** @var array of (stdclass)tasks */
+    public $phases = array();
+    /** @var null|array of example submissions to be assessed by the planner owner */
+    protected $examples = null;
+
+    /**
+     * Prepare an individual teamwork plan for the given user.
+     *
+     * @param teamwork $teamwork instance
+     * @param int $userid whom the plan is prepared for
+     */
+    public function __construct(teamwork $teamwork, $teamid) {
+        global $DB;
+
+        $this->teamwork = $teamwork;
+        $this->userid   = $teamid;
+
+        //---------------------------------------------------------
+        // * SETUP | submission | assessment | evaluation | closed
+        //---------------------------------------------------------
+		$phase_count = $DB->count_records('teamwork_templet_phase');
+		$i = 1;
+		if($phase_count > 0){
+			$phase_records = $DB->get_records('teamwork_templet_phase');
+			foreach($phase_records as $phase_record){
+				$phase = new stdclass();
+				$phase->title = $phase_record->name;
+				$phase->tasks = array();
+				$task = new stdclass();
+				$task->title = get_string('completecount','teamwork');
+				$task->details = '100%';
+				//$task->link = $teamwork->updatemod_url();
+				$task->completed = !(trim($teamwork->intro) == '');
+				$phase->tasks['complete'] = $task;
+				
+				$task = new stdclass();
+				$task->title = get_string('activitycount','teamwork');
+				//$task->link = $teamwork->updatemod_url();
+				$a = array();
+				exec("python sql.py actis ".$teamid." ".$phase_record->timestart.' '.$phase_record->timeend,$a,$b);
+				$task->details = $a[0];
+				$task->completed = true;
+				$phase->tasks['activity'] = $task;
+					
+			
+				$task = new stdclass();
+				$task->title = get_string('commitcount','teamwork');
+				//$task->link = $teamwork->editform_url();
+				if ($teamwork->grading_strategy_instance()->form_ready()) {
+					$task->completed = true;
+				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
+					$task->completed = false;
+				}
+				$phase->tasks['commit'] = $task;
+
+				
+				$task = new stdclass();
+				$task->title =get_string('feedbackcount','teamwork');
+				$task->link = $teamwork->updatemod_url();
+				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
+					$task->completed = true;
+				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
+					$task->completed = false;
+				}
+				$phase->tasks['feedback'] = $task;
+		   
+				
+				$task = new stdclass();
+				$task->title = get_string('workupload','teamwork');
+				$task->link = $teamwork->updatemod_url();
+				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
+					$task->completed = true;
+				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
+					$task->completed = false;
+				}
+				$phase->tasks['workupload'] = $task;
+				
+				$task = new stdclass();
+				$task->title = get_string('finalgrade','teamwork');
+				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
+					$task->completed = true;
+				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
+					$task->completed = false;
+				}
+				$phase->tasks['finalgrade'] = $task;
+				if($i == 1)
+					$this->phases[teamwork::PHASE_SETUP] = $phase;
+				else if($i==2)
+					$this->phases[teamwork::PHASE_SUBMISSION] = $phase;
+				else if($i == 3)
+					$this->phases[teamwork::PHASE_ASSESSMENT] = $phase;
+				else if($i == 4)
+					$this->phases[teamwork::PHASE_EVALUATION] = $phase;
+				else if($i == 5)
+					$this->phases[teamwork::PHASE_CLOSED] = $phase;
+				$i = $i+1;
+			}
+		}
+		while($i<=5){
+			$phase = new stdclass();
+			$phase->title = get_string('unsetphase', 'teamwork');
+			$phase->tasks = array();
+			
+			$task = new stdclass();
+			$task->title = get_string('completecount', 'teamwork');
+			$task->completed = "";
+			$phase->tasks['complete'] = $task;
+			
+			
+			$task = new stdclass();
+			$task->title = get_string('activitycount','teamwork');
+			$task->completed = "";
+			$phase->tasks['activity'] = $task;
+			
+			$task = new stdclass();
+			$task->title = get_string('commitcount','teamwork');
+			$task->completed = "";
+			$phase->tasks['commit'] = $task;
+			
+			$task = new stdclass();
+			$task->title = get_string('feedbackcount','teamwork');
+			$task->completed = "";
+			$phase->tasks['feedback'] = $task;
+			
+			$task = new stdclass();
+			$task->title = get_string('workupload','teamwork');
+			$task->completed = "";
+			$phase->tasks['workupload'] = $task;
+			
+			$task = new stdclass();
+			$task->title = get_string('finalgrade','teamwork');
+			$task->completed = "";
+			$phase->tasks['finalgrade'] = $task;
+			if($i == 1)
+					$this->phases[teamwork::PHASE_SETUP] = $phase;
+				else if($i==2)
+					$this->phases[teamwork::PHASE_SUBMISSION] = $phase;
+				else if($i == 3)
+					$this->phases[teamwork::PHASE_ASSESSMENT] = $phase;
+				else if($i == 4)
+					$this->phases[teamwork::PHASE_EVALUATION] = $phase;
+				else if($i == 5)
+					$this->phases[teamwork::PHASE_CLOSED] = $phase;
+			$i = $i+1;
+		}
+
+        // Polish data, set default values if not done explicitly
+        foreach ($this->phases as $phasecode => $phase) {
+            $phase->title       = isset($phase->title)      ? $phase->title     : '';
+            $phase->tasks       = isset($phase->tasks)      ? $phase->tasks     : array();
+            if ($phasecode == 20) {
+                $phase->active = true;
+            } else {
+                $phase->active = false;
+            }
+            if (!isset($phase->actions)) {
+                $phase->actions = array();
+            }
+
+            foreach ($phase->tasks as $taskcode => $task) {
+                $task->title        = isset($task->title)       ? $task->title      : '';
+                $task->link         = isset($task->link)        ? $task->link       : null;
+                $task->details      = isset($task->details)     ? $task->details    : '';
+                $task->completed    = isset($task->completed)   ? $task->completed  : null;
+            }
+        }
+
+        // Add phase switching actions
+        /*    foreach ($this->phases as $phasecode => $phase) {
+                if (! $phase->active) {
+                    $action = new stdclass();
+                    $action->type = 'switchphase';
+                    $action->url  = $teamwork->switchphase_url($phasecode);
+                    $phase->actions[] = $action;
+                }
+            }
+		*/
+    }
+	
+	/**
+	 @author  gavin
+	 
+	 prepare the team information to display
+	 
+	
+	
+	
+	*/
+	
+
+    /**
+     * Returns example submissions to be assessed by the owner of the planner
+     *
+     * This is here to cache the DB query because the same list is needed later in view.php
+     *
+     * @see teamwork::get_examples_for_reviewer() for the format of returned value
+     * @return array
+     */
+    public function get_examples() {
+        if (is_null($this->examples)) {
+            $this->examples = $this->teamwork->get_examples_for_reviewer($this->userid);
+        }
+        return $this->examples;
+    }
+}
+class teamwork_team_list implements renderable {
+    /** @var int teamworkid */
+    public $teamwork;
+    /** @var array of (stdclass)templets*/
+    public $container = array();
+
+    /**
+     * Prepare an tasks list for the given teamwork moudle.
+     *
+     * @param int $teamwork
+     * @param moodle_url $url
+     */
+    public function __construct($teamwork) {
+        global $DB;
+        $this->teamwork = $teamwork;
+        $this->container = $DB->get_records_list('teamwork_instance', 'teamwork', array($this->teamwork));
+    }
+}
+
+/**
  * Overview of templets list when user can edit templets
  *
  * Templets list contains several templets. Each templet contains templet header, templet introduce, and a "join in"
@@ -2980,38 +3264,29 @@ class teamwork_myproject implements renderable {
  */
 class teamwork_user_plan implements renderable {
 
-    /** @var int id of the user this plan is for */
-    public $userid;
     /** @var teamwork */
     public $teamwork;
-    /** @var array of team */
+    /** @var instance */
     public $instance = array();
 
 
     /**
-     * Prepare an individual teamwork plan for the given user.
+     * Prepare an individual teamwork plan for the given instance.
      *
      * @param teamwork $teamwork instance
-     * @param int $userid whom the plan is prepared for
+     * @param int $instance whom the plan is prepared for
      */
-    public function __construct(teamwork $teamwork, $userid) {
+    public function __construct(teamwork $teamwork, $instance) {
         global $DB;
 
         $this->teamwork = $teamwork;
-        $this->userid   = $userid;
-		$teams_temp = $DB->get_records('teamwork_teammembers',array('teamwork' => $this->teamwork->id,'userid' => $this->userid));
-		foreach($teams_temp as $team) {
-			$temp = $DB->get_record('teamwork_instance',array('teamwork' => $this->teamwork->id,'team' => $team->team));
-			$this->instance[$temp->id] = $temp;
-			$temp2 = $DB->get_records('teamwork_instance_phase',array('teamwork' => $this->teamwork->id,'instance' => $temp->id));
-			foreach($temp2 as $phase_temp) {
-				$this->instance[$temp->id]->phases[$phase_temp->orderid] = $phase_temp;
-			}
+		$temp = $DB->get_record('teamwork_instance',array('id' => $instance));
+		$this->instance[$temp->id] = $temp;
+		$temp2 = $DB->get_records('teamwork_instance_phase',array('teamwork' => $this->teamwork->id,'instance' => $temp->id));
+		foreach($temp2 as $phase_temp) {
+			$this->instance[$temp->id]->phases[$phase_temp->orderid] = $phase_temp;
+		}
 
-		} 
-
-
-       
     }
 
     /**
@@ -3107,6 +3382,58 @@ abstract class teamwork_submission_base {
  * @see teamwork_renderer::render_teamwork_submission_summary
  */
 class teamwork_submission_summary extends teamwork_submission_base implements renderable {
+
+    /** @var int */
+    public $id;
+    /** @var string */
+    public $title;
+    /** @var string graded|notgraded */
+    public $status;
+    /** @var int */
+    public $timecreated;
+    /** @var int */
+    public $timemodified;
+    /** @var int */
+    public $authorid;
+    /** @var string */
+    public $authorfirstname;
+    /** @var string */
+    public $authorlastname;
+    /** @var string */
+    public $authorfirstnamephonetic;
+    /** @var string */
+    public $authorlastnamephonetic;
+    /** @var string */
+    public $authormiddlename;
+    /** @var string */
+    public $authoralternatename;
+    /** @var int */
+    public $authorpicture;
+    /** @var string */
+    public $authorimagealt;
+    /** @var string */
+    public $authoremail;
+    /** @var moodle_url to display submission */
+    public $url;
+
+    /**
+     * @var array of columns from teamwork_submissions that are assigned as properties
+     * of instances of this class
+     */
+    protected $fields = array(
+        'id', 'title', 'timecreated', 'timemodified',
+        'authorid', 'authorfirstname', 'authorlastname', 'authorfirstnamephonetic', 'authorlastnamephonetic',
+        'authormiddlename', 'authoralternatename', 'authorpicture',
+        'authorimagealt', 'authoremail');
+}
+
+
+/**
+ * Renderable object containing a basic set of information needed to display the submission summary
+ *
+ * @see teamwork_renderer::render_teamwork_submission_summary
+ */
+class teamwork_forum_summary extends teamwork_submission_base implements renderable {
 
     /** @var int */
     public $id;

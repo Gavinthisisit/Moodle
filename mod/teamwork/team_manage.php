@@ -31,7 +31,7 @@ require_once(dirname(__FILE__).'/locallib.php');
 require_once($CFG->libdir.'/completionlib.php');
 
 $id         = optional_param('id', 0, PARAM_INT); // course_module ID, or
-$w          = optional_param('w', 0, PARAM_INT);  // teamwork instance ID
+$w          = optional_param('w', 0, PARAM_INT);  // teamwork instance ID"D.sd'dsf.'sd;fs';
 $templetid  = optional_param('templetid', 0, PARAM_INT);
 $teamid  = optional_param('teamid', 0, PARAM_INT);
 $memberid  = optional_param('remove', 0, PARAM_INT);
@@ -48,23 +48,40 @@ if ($id) {
 }
 
 require_login($course, true, $cm);
+$teamwork = new teamwork($teamworkrecord, $cm, $course);
+
 if($templetview!=0){
 	require_capability('mod/teamwork:editsettings', $PAGE->context);
 
 	$PAGE->set_title(get_string('viewteaminfo', 'teamwork'));
 	$PAGE->set_heading($course->fullname);	
 	$output = $PAGE->get_renderer('mod_teamwork');
+	
 	echo $output->header();
 	
+	$project = $DB->get_record('teamwork_templet',array('id' => $templetview));
+	$team_module = html_writer::link($task->link, get_string('teammodule','teamwork'));
+	$blank = "\t";
+	echo $output->heading($project->title);
+	//echo  '<h3 style="text-align:left">'.$project->title;
+	//echo '<h3 style="text-align:right">'.$team_module .'</h3>';
 	$teams = $DB->get_records('teamwork_team', array('templet' => $templetview, 'teamwork' => $w));
 	foreach($teams as $team){
 		print_collapsible_region_start('', 'teamwork-info-'.$team->id, $team->name);
+		
 		$renderable = new teamwork_team_manage($w, $team->id);
+		
 		echo $output->render($renderable);
+		
+		$teaminfo = new teamwork_team_info($teamwork, $team->id);
+		
+		echo $output->render($teaminfo);
+		
 		print_collapsible_region_end();
+		
 	}
 	echo $output->footer();
-}else{
+}else{ 
 	require_capability('mod/teamwork:view', $PAGE->context);
 	$teamleader_record = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id, 'teamwork' => $w,'leader' => 1));
 	if(empty($teamleader_record)){

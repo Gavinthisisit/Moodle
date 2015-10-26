@@ -75,6 +75,28 @@ $output_tab = ob_get_contents();
 ob_end_clean();
 echo $output_tab;
 
-$userplan = new teamwork_user_plan($teamwork, $USER->id);
-echo $output->render($userplan);
+$teamrecords = $DB->get_records('teamwork_teammembers', array('teamwork' => $w,'userid' => $USER->id));
+
+foreach($teamrecords as $teamrecord){
+	$instancerecord = $DB->get_record('teamwork_instance', array('teamwork' => $w,'team' => $teamrecord->team));
+	$userplan = new teamwork_user_plan($teamwork, $instancerecord->id);
+	echo $output->render($userplan);
+	
+	print_collapsible_region_start('', 'workshop-viewlet-teamsubmission', get_string('teamsubmission', 'teamwork'));
+	echo $output->box_start('generalbox teamsubmission');
+	
+	echo $output->box_end();
+	print_collapsible_region_end();
+	
+	print_collapsible_region_start('', 'workshop-viewlet-ownsubmission', get_string('yoursubmission', 'teamwork'));
+	echo $output->box_start('generalbox ownsubmission');
+	echo $output->single_button("submission.php?teamwork=$w&instance=$instancerecord->id", get_string('createsubmission', 'teamwork'), 'get');
+	echo $output->box_end();
+	print_collapsible_region_end();
+}
+
+
+
+
+
 echo $output->footer();

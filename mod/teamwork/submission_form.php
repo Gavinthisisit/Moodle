@@ -34,8 +34,10 @@ class teamwork_submission_form extends moodleform {
 
         $current        = $this->_customdata['current'];
         $teamwork       = $this->_customdata['teamwork'];
+        $instanceid     = $this->_customdata['instanceid'];
         $contentopts    = $this->_customdata['contentopts'];
         $attachmentopts = $this->_customdata['attachmentopts'];
+        
 
         $mform->addElement('header', 'general', get_string('submission', 'teamwork'));
 
@@ -46,14 +48,17 @@ class teamwork_submission_form extends moodleform {
         $mform->addElement('editor', 'content_editor', get_string('submissioncontent', 'teamwork'), null, $contentopts);
         $mform->setType('content', PARAM_RAW);
 
-        if ($teamwork->nattachments > 0) {
-            $mform->addElement('static', 'filemanagerinfo', get_string('nattachments', 'teamwork'), $teamwork->nattachments);
+
+            $mform->addElement('static', 'filemanagerinfo', get_string('nattachments', 'teamwork'));
             $mform->addElement('filemanager', 'attachment_filemanager', get_string('submissionattachment', 'teamwork'),
                                 null, $attachmentopts);
-        }
+
 
         $mform->addElement('hidden', 'id', $current->id);
         $mform->setType('id', PARAM_INT);
+        
+        $mform->addElement('hidden', 'instance', $instanceid);
+        $mform->setType('instance', PARAM_INT);
 
         $mform->addElement('hidden', 'cmid', $teamwork->cm->id);
         $mform->setType('cmid', PARAM_INT);
@@ -73,21 +78,6 @@ class teamwork_submission_form extends moodleform {
         global $CFG, $USER, $DB;
 
         $errors = parent::validation($data, $files);
-
-        if (empty($data['id']) and empty($data['example'])) {
-            // make sure there is no submission saved meanwhile from another browser window
-            $sql = "SELECT COUNT(s.id)
-                      FROM {teamwork_submissions} s
-                      JOIN {teamwork} w ON (s.teamworkid = w.id)
-                      JOIN {course_modules} cm ON (w.id = cm.instance)
-                      JOIN {modules} m ON (m.name = 'teamwork' AND m.id = cm.module)
-                     WHERE cm.id = ? AND s.authorid = ? AND s.example = 0";
-
-            if ($DB->count_records_sql($sql, array($data['cmid'], $USER->id))) {
-                $errors['title'] = get_string('err_multiplesubmissions', 'mod_teamwork');
-            }
-        }
-
         return $errors;
     }
 }
