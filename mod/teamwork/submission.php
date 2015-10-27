@@ -82,11 +82,17 @@ if ($submission->id and !$teamwork->modifying_submission_allowed($USER->id)) {
     $editable = false;
 }
 
-$edit = true;
 
+$instancerecord = $DB->get_record('teamwork_instance', array('id' => $instanceid));
+$teamrecord = $DB->get_record('teamwork_team', array('id' => $instancerecord->team));
+$ismember = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id, 'team' => $teamrecord->id));
 
+$edit = $ismember;
 
-
+// Output starts here
+$output = $PAGE->get_renderer('mod_teamwork');
+echo $output->header();
+echo $output->heading(format_string($teamwork->name), 2);
 
 
 if ($edit) {
@@ -187,6 +193,8 @@ if ($edit) {
 		$rtn_url = new moodle_url("project.php",array('w' => $formdata->teamworkid, 'instance' => $formdata->instance));
         redirect($rtn_url);
     }
+} else {
+	echo $output->render($teamwork->prepare_submission($submission, true));
 }
 
 
@@ -202,10 +210,7 @@ if ($edit) {
     $PAGE->navbar->add(get_string('submission', 'teamwork'));
 }
 
-// Output starts here
-$output = $PAGE->get_renderer('mod_teamwork');
-echo $output->header();
-echo $output->heading(format_string($teamwork->name), 2);
+
 
 // show instructions for submitting as thay may contain some list of questions and we need to know them
 // while reading the submitted answer

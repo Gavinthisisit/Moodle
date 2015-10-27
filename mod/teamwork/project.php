@@ -89,23 +89,27 @@ echo $output->perpage_selector($perpage);
 echo $output->box_end();
 print_collapsible_region_end();
 
-// Output own submissions here
-print_collapsible_region_start('', 'workshop-viewlet-ownsubmission', get_string('yoursubmission', 'teamwork'));
-echo $output->box_start('generalbox ownsubmission');
 
-$countsubmissions = $teamwork->count_submissions($USER->id);
-$perpage = get_user_preferences('teamwork_perpage', 10);
-$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
-$submissions = $teamwork->get_submissions($USER->id, 0, $page * $perpage, $perpage);
-$shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
-echo $output->render($pagingbar);
-foreach ($submissions as $submission) {
-    echo $output->render($teamwork->prepare_submission_summary($submission, $shownames));
+$ismember = $DB->get_record('teamwork_teammembers', array('userid' => $USER->id, 'team' => $teamrecord->id));
+if($ismember){
+	// Output own submissions here
+	print_collapsible_region_start('', 'workshop-viewlet-ownsubmission', get_string('yoursubmission', 'teamwork'));
+	echo $output->box_start('generalbox ownsubmission');
+	
+	$countsubmissions = $teamwork->count_submissions($USER->id);
+	$perpage = get_user_preferences('teamwork_perpage', 10);
+	$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
+	$submissions = $teamwork->get_submissions($USER->id, 0, $page * $perpage, $perpage);
+	$shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
+	echo $output->render($pagingbar);
+	foreach ($submissions as $submission) {
+	    echo $output->render($teamwork->prepare_submission_summary($submission, $shownames));
+	}
+	echo $output->render($pagingbar);
+	echo $output->perpage_selector($perpage);
+	echo $output->single_button("submission.php?teamwork=$w&instance=$instancerecord->id", get_string('createsubmission', 'teamwork'), 'get');
 }
-echo $output->render($pagingbar);
-echo $output->perpage_selector($perpage);
 
-echo $output->single_button("submission.php?teamwork=$w&instance=$instancerecord->id", get_string('createsubmission', 'teamwork'), 'get');
 echo $output->box_end();
 print_collapsible_region_end();
 
