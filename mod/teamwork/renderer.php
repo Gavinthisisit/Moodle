@@ -695,7 +695,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
                 $output .= html_writer::end_tag('a'); // .name
                 $output .= html_writer::end_tag('h3'); // .name
                 $output .= html_writer::tag('div', '', array('class' => 'moreinfo'));
-                if($teamwork->applyover == 0){
+                //if($teamwork->applyover == 0){
 	                $output .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
 	                $std_btn = new stdClass();
 	                $std_btn->url = new moodle_url('templet_edit.php',array('id' => $list->teamwork, 'update' => $templet->id));
@@ -703,7 +703,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 	                $std_btn->method = 'post';
 	                $output .= $this->single_button($std_btn->url, $std_btn->str, $std_btn->method);
 	                $output .= html_writer::end_tag('div');
-            	}
+            	//}
                 
                 $output .= html_writer::end_tag('div'); // .info
                 $output .= html_writer::start_tag('div', array('class' => 'content'));

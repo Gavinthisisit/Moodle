@@ -116,7 +116,7 @@ if ($edit) {
                                         'mod_teamwork', 'submission_attachment', $submission->id);
 
     $mform          = new teamwork_submission_form($PAGE->url, array('current' => $submission, 'teamwork' => $teamwork, 'instanceid' => $instanceid,
-                                                    'contentopts' => $contentopts, 'attachmentopts' => $attachmentopts));
+                                                    'contentopts' => $contentopts, 'attachmentopts' => $attachmentopts, 'phase' => $instancerecord->currentphase));
 
     if ($mform->is_cancelled()) {
         redirect($teamwork->view_url());

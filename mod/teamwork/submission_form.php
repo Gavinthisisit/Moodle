@@ -37,6 +37,7 @@ class teamwork_submission_form extends moodleform {
         $instanceid     = $this->_customdata['instanceid'];
         $contentopts    = $this->_customdata['contentopts'];
         $attachmentopts = $this->_customdata['attachmentopts'];
+        $phase = $this->_customdata['phase'];
         
 
         $mform->addElement('header', 'general', get_string('submission', 'teamwork'));
@@ -59,6 +60,9 @@ class teamwork_submission_form extends moodleform {
         
         $mform->addElement('hidden', 'instance', $instanceid);
         $mform->setType('instance', PARAM_INT);
+        
+        $mform->addElement('hidden', 'phase', $phase);
+        $mform->setType('phase', PARAM_INT);
 
         $mform->addElement('hidden', 'cmid', $teamwork->cm->id);
         $mform->setType('cmid', PARAM_INT);

@@ -108,10 +108,11 @@ if($ismember){
 	echo $output->render($pagingbar);
 	echo $output->perpage_selector($perpage);
 	echo $output->single_button("submission.php?teamwork=$w&instance=$instancerecord->id", get_string('createsubmission', 'teamwork'), 'get');
+	echo $output->box_end();
+	print_collapsible_region_end();
 }
 
-echo $output->box_end();
-print_collapsible_region_end();
+
 
 
 echo $output->footer();

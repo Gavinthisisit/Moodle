@@ -4080,8 +4080,10 @@ function generate_instanse_from_templet($teamwork) {
 	foreach($teams as $team) {
 		$templet = $DB->get_record('teamwork_templet',array('id' => $team->templet));
 		$phases = $DB->get_records('teamwork_templet_phase',array('templet' => $templet->id));
+		$templet->templet = $templet->id;
 		unset($templet->id);
 		$templet->team = $team->id;
+		$templet->currentphase = 1;
 		$instanceid = $DB->insert_record('teamwork_instance',$templet);
 		foreach($phases as $phase) {
 			unset($phase->id);

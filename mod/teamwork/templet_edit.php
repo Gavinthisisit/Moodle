@@ -113,11 +113,19 @@ function save_templet_data($course,$data){
 	$newtemplet->scoremax = (int)$data->scoremax;
 	$newtemplet->anonymous = (int)$data->assessmentanonymous;
 	$newtemplet->assessfirst = (int)$data->assessfirst;
+	
+	
+
 	if($data->templetid!=0){
 		$update = $data->templetid;
 		$newtemplet->id = $update;
 		$DB->update_record('teamwork_templet',$newtemplet);
 		$templetid = $update;
+		$instances = $DB->get_records('teamwork_instance',array('templet' => $templetid));
+		foreach($instances as $instance){
+			$newtemplet->id = $instance->id;
+			$DB->update_record('teamwork_instance',$newtemplet);
+		}
 	}else{
 		$templetid = $DB->insert_record('teamwork_templet',$newtemplet);
 	}
@@ -139,6 +147,16 @@ function save_templet_data($course,$data){
 			$DB->update_record('teamwork_templet_phase',$newphase);
 		}else{
 			$DB->insert_record('teamwork_templet_phase',$newphase);
+		}
+		$instances = $DB->get_records('teamwork_instance',array('templet' => $templetid));
+		foreach($instances as $instance){
+			$record = $DB->get_record('teamwork_instance_phase',array('instance'=>$instance->id,'orderid'=>$i));
+			if(!empty($record)){
+				$newphase->id = $record->id;
+				$DB->update_record('teamwork_instance_phase',$newphase);
+			}else{
+				$DB->insert_record('teamwork_instance_phase',$newphase);
+			}
 		}
 	}
 	
