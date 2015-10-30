@@ -1,0 +1,59 @@
+This files describes API changes in /mod/teamworkforum/*,
+information provided here is intended especially for developers.
+
+=== 2.8 ===
+ * The following functions have all been marked as deprecated. Many of
+   these have not been supported in many releases and should not be relied
+   upon:
+     teamworkforum_count_unrated_posts
+     teamworkforum_tp_count_discussion_read_records
+     teamworkforum_get_user_discussions
+     teamworkforum_tp_count_teamworkforum_posts
+     teamworkforum_tp_count_teamworkforum_read_records
+     teamworkforum_get_open_modes
+     teamworkforum_get_child_posts
+     teamworkforum_get_discussion_posts
+     teamworkforum_get_ratings
+     teamworkforum_get_tracking_link
+     teamworkforum_tp_count_discussion_unread_posts
+     teamworkforum_convert_to_roles
+     teamworkforum_tp_get_read_records
+     teamworkforum_tp_get_discussion_read_records
+     teamworkforum_user_enrolled
+     teamworkforum_user_can_view_post
+ * The following functions have been deprecated and replaced. Please see the phpdoc for each on the new function to use instead:
+   * teamworkforum_is_subscribed
+   * teamworkforum_subscribe
+   * teamworkforum_unsubscribe
+   * teamworkforum_subscribed_users
+   * teamworkforum_is_forcesubscribed
+   * teamworkforum_forcesubscribe
+   * teamworkforum_get_forcesubscribed
+   * teamworkforum_get_subscribed_teamworkforums
+   * teamworkforum_get_optional_subscribed_teamworkforums
+   * teamworkforum_get_potential_subscribers
+ * External function mod_teamworkforum_external::get_teamworkforum_discussions has been deprecated.
+   Use mod_teamworkforum_external::get_teamworkforum_discussions_paginated instead.
+
+=== 2.6 ===
+
+* The file post_form.php should not be included, the class it contained has
+  been moved so that it can benefit from autoloading.
+* The function teamworkforum_shorten_post() has been deprecated. It was doing a poor
+  job of shortening teamworkforum post text and the shorten_text() function does a
+  much better job.
+* The constant FORUM_TRACKING_ON has been depreciated and replaced by
+  FORUM_TRACKING_FORCED. The value between them is maintained, so they are
+  interchangeable, but code should migrate to the new name.
+
+=== 2.5 ===
+
+The function teamworkforum_check_throttling has been changed so that a warning object is returned when a user has reached the 'Post threshold for warning' or
+'Post threshold for blocking' setting, rather than echoing this on screen. This allows the warning to be moved inside the post form as it can be added
+as a HTML element, where it is more noticeable. False is returned if there is no need to warn, or restrict the user from posting - see MDL-39182.
+
+=== 2.3.5, 2.4.2 ===
+
+* mod/teamworkforum:allowforcesubscribe capability will be forcefully assigned to frontpage role, as it was mistakenly missed off
+when the capability was initially created. If you don't want users with frontpage role to get teamworkforum (with forcesubscribe) emails,
+then please remove this capability for frontpage role.

@@ -1,0 +1,8 @@
+{
+    "moodle-mod_teamworkforum-subscriptiontoggle": {
+        "requires": [
+            "base-base",
+            "io-base"
+        ]
+    }
+}

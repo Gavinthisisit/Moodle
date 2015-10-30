@@ -1,0 +1,167 @@
+/**
+ * Structure of a teamworkforum post
+ * div.teamworkforumpost(.read.unread)
+ *     div.header.row
+ *         div.picture.left
+ *         div.topic(.starter)
+ *             div.subject
+ *             div.author
+ *     div.row
+ *         div.side.left
+ *         div.content-mask
+ *             div.content
+ *                 div.attachments
+ *                 div.posting(.shortenedpost|.fullpost)
+ *                     // message
+ *                 div.attachedimages
+ *                     // attachedimages
+ *     div.row
+ *         div.left
+ *         div.options
+ *             div.commands
+ *             div.post-word-count
+ *             div.teamworkforum-post-rating
+ *             div.link
+ *             div.footer
+ */
+
+.teamworkforumpost {display: block;position:relative;margin:0 0 1em 0;padding:0;border:1px solid #000;max-width:100%;}
+.teamworkforumpost .row {width:100%;position:relative;}
+.teamworkforumpost .row .left {float:left;width: 43px;overflow:hidden;}
+.teamworkforumpost .row .left .grouppictures a {text-align:center;display:block;margin:6px 2px 0 2px;}
+.teamworkforumpost .row .left .grouppicture {width:20px;height:20px;}
+.teamworkforumpost .row .topic,
+.teamworkforumpost .row .content-mask,
+.teamworkforumpost .row .options {margin-left:43px;}
+.teamworkforumpost .picture img {margin:4px;}
+.teamworkforumpost .options .commands,
+.teamworkforumpost .content .attachments,
+.teamworkforumpost .options .footer,
+.teamworkforumpost .options .link {text-align:right;}
+.teamworkforumpost .options .teamworkforum-post-rating {float:left;}
+.teamworkforumpost .content .posting {overflow:auto;max-width:100%;}
+.teamworkforumpost .content .attachedimages img {max-width:100%;}
+.teamworkforumpost .post-word-count { font-size: .85em; font-style: italic; }
+.teamworkforumpost .shortenedpost .post-word-count { display: inline; padding: 0 .3em; }
+
+.dir-rtl .teamworkforumpost .row .topic,
+.dir-rtl .teamworkforumpost .row .content-mask,
+.dir-rtl .teamworkforumpost .row .options {margin-right:43px;margin-left:0;}
+.dir-rtl .teamworkforumpost .row .left {float:right;}
+.dir-rtl.path-mod-teamworkforum .indent {
+    margin-right: 3%;
+    margin-left: 0;
+}
+
+.path-mod-teamworkforum .teamworkforumolddiscuss,
+#page-mod-teamworkforum-search .c0 {text-align:right;}
+.path-mod-teamworkforum .indent {
+    margin-left: 3%;
+}
+.path-mod-teamworkforum .teamworkforumheaderlist {width: 100%;border-width:1px;border-style:solid;border-collapse:separate;margin-top: 10px;}
+.path-mod-teamworkforum .teamworkforumheaderlist td {border-width:1px 0px 0px 1px;border-style:solid;}
+.path-mod-teamworkforum .teamworkforumheaderlist th.header.replies .iconsmall { margin: 0 .3em;}
+.path-mod-teamworkforum .teamworkforumheaderlist .picture {width: 35px;}
+.path-mod-teamworkforum .teamworkforumheaderlist .discussion .starter {vertical-align: middle;}
+.path-mod-teamworkforum .teamworkforumheaderlist .discussion .lastpost {white-space: nowrap;text-align: right;}
+.path-mod-teamworkforum .teamworkforumheaderlist .replies,
+.path-mod-teamworkforum .teamworkforumheaderlist .discussion .author {white-space: nowrap;}
+.path-mod-teamworkforum .teamworkforumheaderlist thead .discussionsubscription {
+    text-align: center;
+}
+
+/** Styles for subscribers.php */
+#page-mod-teamworkforum-subscribers .subscriberdiv,
+#page-mod-teamworkforum-subscribers .subscribertable {width:100%;vertical-align:top;}
+#page-mod-teamworkforum-subscribers .subscribertable tr td {vertical-align:top;}
+#page-mod-teamworkforum-subscribers .subscribertable tr td.actions {width:16%;padding-top:3em;}
+#page-mod-teamworkforum-subscribers .subscribertable tr td.actions .actionbutton {margin:0.3em 0;padding:0.5em 0;width:100%;}
+#page-mod-teamworkforum-subscribers .subscribertable tr td.existing,
+#page-mod-teamworkforum-subscribers .subscribertable tr td.potential {width:42%;}
+
+/** Styles for discuss.php **/
+#page-mod-teamworkforum-discuss .discussioncontrols {width:100%;margin:5px;}
+#page-mod-teamworkforum-discuss .discussioncontrols .discussioncontrol {width:33%;float:left;}
+#page-mod-teamworkforum-discuss .discussioncontrol.exporttoportfolio {text-align:left;}
+#page-mod-teamworkforum-discuss .discussioncontrol.displaymode {text-align:center;}
+#page-mod-teamworkforum-discuss .discussioncontrol.movediscussion {float:right;width:auto;text-align:right;padding-right:10px;}
+#page-mod-teamworkforum-discuss .discussioncontrol.movediscussion .movediscussionoption {}
+
+/** Styles for view.php **/
+#page-mod-teamworkforum-view .teamworkforumaddnew {margin-bottom: 20px;}
+#page-mod-teamworkforum-view .groupmenu {float: left;text-align:left;white-space: nowrap;}
+#page-mod-teamworkforum-index .subscription,
+#page-mod-teamworkforum-view .subscription {float: right;text-align:right;white-space: nowrap;margin: 5px 0;}
+
+/** Styles for search.php */
+#page-mod-teamworkforum-search .introcontent {padding: 15px;font-weight:bold;}
+
+#page-mod-teamworkforum-index .unread a:first-child,
+#page-mod-teamworkforum-view .unread a:first-child {padding-right: 10px;}
+#page-mod-teamworkforum-index .unread img,
+#page-mod-teamworkforum-view .unread img {margin-left: 5px;}
+#page-mod-teamworkforum-view .unread img {margin-left: 5px;}
+.dir-rtl#page-mod-teamworkforum-view .unread img {margin-right: 5px; margin-left: 0; }
+
+/** Unknown Styles ??? */
+#email .unsubscribelink {margin-top:20px;}
+
+/* Forumpost unread
+-------------------------*/
+#page-mod-teamworkforum-view .unread,
+.teamworkforumpost.unread .row.header,
+.path-course-view .unread,
+span.unread {
+    background-color: #FFD;
+}
+.teamworkforumpost.unread .row.header {
+    border-bottom: 1px solid #DDD;
+}
+
+/* Discussion navigation */
+.path-mod-teamworkforum .discussion-nav {
+    margin: .5em 0;
+}
+.path-mod-teamworkforum .discussion-nav ul {
+    margin: 0;
+    list-style: none;
+}
+.dir-rtl.path-mod-teamworkforum .discussion-nav .next-discussion:after,
+.path-mod-teamworkforum .discussion-nav .prev-discussion:before {
+    content: ' ◄ ';
+}
+.dir-rtl.path-mod-teamworkforum .discussion-nav .prev-discussion:before,
+.path-mod-teamworkforum .discussion-nav .next-discussion:after {
+    content: ' ► ';
+}
+.dir-rtl.path-mod-teamworkforum .discussion-nav .prev-discussion,
+.path-mod-teamworkforum .discussion-nav .next-discussion {
+    float: right;
+}
+.dir-rtl.path-mod-teamworkforum .discussion-nav .next-discussion,
+.path-mod-teamworkforum .discussion-nav .prev-discussion {
+    float: left;
+}
+
+.path-mod-teamworkforum .preload-subscribe {
+    background: url([[pix:mod_teamworkforum|t/subscribed]]) no-repeat -9999px -9999px;
+}
+
+.path-mod-teamworkforum .preload-unsubscribe {
+    background: url([[pix:mod_teamworkforum|t/unsubscribed]]) no-repeat -9999px -9999px;
+}
+
+.path-mod-teamworkforum .discussionsubscription {
+    margin-top: -10px;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.path-mod-teamworkforum .discussionsubscription > a > img {
+    width: 12px;
+    padding: 0 4px;
+}
+
+.dir-rtl .path-mod-teamworkforum .discussionsubscription {
+    text-align: left;
+}
