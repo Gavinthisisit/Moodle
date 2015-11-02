@@ -392,3 +392,4 @@ $string['activitysituation'] = 'Activity Situation';
 $string['fen'] = 'fen';
 $string['de'] = 'de';
 $string['assessments'] = 'All assessments';
+$string['needassess'] = 'Need Assess';

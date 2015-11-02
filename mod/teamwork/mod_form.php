@@ -233,7 +233,7 @@ class mod_teamwork_mod_form extends moodleform_mod {
 }
 
 /**
- * Templet settings form for templet
+ * Settings form for templet
  */
 class teamwork_templet_form extends moodleform {
 
@@ -348,6 +348,217 @@ class teamwork_templet_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'templetid', $this->templetid);
         $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'phasenum', $this->phasenum);
+        $mform->setType('phasenum', PARAM_INT);
+		$mform->setConstants(array('phasenum' => $this->phasenum));
+        // Standard buttons, common to all modules ------------------------------------
+        $this->add_action_buttons();
+
+    }
+
+    /**
+     * Prepares the form before data are set
+     *
+     * Additional wysiwyg editor are prepared here, the introeditor is prepared automatically by core.
+     * Grade items are set here because the core modedit supports single grade item only.
+     *
+     * @param array $data to be set
+     * @return void
+     */
+    public function data_preprocessing(&$data) {
+        if ($this->current->instance) {
+            // editing an existing teamwork - let us prepare the added editor elements (intro done automatically)
+            $draftitemid = file_get_submitted_draft_itemid('instructauthors');
+            $data['instructauthorseditor']['text'] = file_prepare_draft_area($draftitemid, $this->context->id,
+                                'mod_teamwork', 'instructauthors', 0,
+                                teamwork::instruction_editors_options($this->context),
+                                $data['instructauthors']);
+            $data['instructauthorseditor']['format'] = $data['instructauthorsformat'];
+            $data['instructauthorseditor']['itemid'] = $draftitemid;
+
+            $draftitemid = file_get_submitted_draft_itemid('instructreviewers');
+            $data['instructreviewerseditor']['text'] = file_prepare_draft_area($draftitemid, $this->context->id,
+                                'mod_teamwork', 'instructreviewers', 0,
+                                teamwork::instruction_editors_options($this->context),
+                                $data['instructreviewers']);
+            $data['instructreviewerseditor']['format'] = $data['instructreviewersformat'];
+            $data['instructreviewerseditor']['itemid'] = $draftitemid;
+
+            $draftitemid = file_get_submitted_draft_itemid('conclusion');
+            $data['conclusioneditor']['text'] = file_prepare_draft_area($draftitemid, $this->context->id,
+                                'mod_teamwork', 'conclusion', 0,
+                                teamwork::instruction_editors_options($this->context),
+                                $data['conclusion']);
+            $data['conclusioneditor']['format'] = $data['conclusionformat'];
+            $data['conclusioneditor']['itemid'] = $draftitemid;
+        } else {
+            // adding a new teamwork instance
+            $draftitemid = file_get_submitted_draft_itemid('instructauthors');
+            file_prepare_draft_area($draftitemid, null, 'mod_teamwork', 'instructauthors', 0);    // no context yet, itemid not used
+            $data['instructauthorseditor'] = array('text' => '', 'format' => editors_get_preferred_format(), 'itemid' => $draftitemid);
+
+            $draftitemid = file_get_submitted_draft_itemid('instructreviewers');
+            file_prepare_draft_area($draftitemid, null, 'mod_teamwork', 'instructreviewers', 0);    // no context yet, itemid not used
+            $data['instructreviewerseditor'] = array('text' => '', 'format' => editors_get_preferred_format(), 'itemid' => $draftitemid);
+
+            $draftitemid = file_get_submitted_draft_itemid('conclusion');
+            file_prepare_draft_area($draftitemid, null, 'mod_teamwork', 'conclusion', 0);    // no context yet, itemid not used
+            $data['conclusioneditor'] = array('text' => '', 'format' => editors_get_preferred_format(), 'itemid' => $draftitemid);
+        }
+    }
+
+    /**
+     * Set the grade item categories when editing an instance
+     */
+    public function definition_after_data() {
+
+        parent::definition_after_data();
+    }
+
+    /**
+     * Validates the form input
+     *
+     * @param array $data submitted data
+     * @param array $files submitted files
+     * @return array eventual errors indexed by the field name
+     */
+    public function validation($data, $files) {
+        $errors = array();
+
+        return $errors;
+    }
+}
+
+/**
+ * Settings form for instance
+ */
+class teamwork_instance_form extends moodleform {
+
+	protected $teamworkid = 0;
+	protected $instanceid = 0;
+	protected $templet = 0;
+	protected $currentphase = 0;
+	protected $phasenum = 0;
+    /**
+     * Constructor
+     */
+    public function __construct($teamworkid,$instanceid=0,$phasenum=0) {
+    	global $DB;
+    	
+    	$instancerecord = $DB->get_record('teamwork_instance',array('id' => $instanceid));
+    	
+    	$this->teamworkid = $teamworkid;
+    	$this->instanceid = $instanceid;
+    	$this->templet = $instancerecord->templet;
+    	$this->currentphase = $instancerecord->currentphase;
+    	$this->phasenum = $phasenum==0 ? optional_param('phasenum', 0, PARAM_INT):$phasenum;
+    	$phaseadd = optional_param('phaseadd', '', PARAM_TEXT);
+    	if($phaseadd){
+    		$this->phasenum++;
+    	}
+        parent::__construct();
+    }
+
+    /**
+     * Defines the teamwork instance configuration form
+     *
+     * @return void
+     */
+    public function definition() {
+        global $CFG;
+
+        $teamworkconfig = get_config('teamwork');
+        $mform = $this->_form;
+
+        // General --------------------------------------------------------------------
+        $mform->addElement('header', 'general', get_string('general', 'form'));
+
+        // Templet title
+        $label = get_string('templettitle', 'teamwork');
+        $mform->addElement('text', 'title', $label, array('size'=>'64'));
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('title', PARAM_TEXT);
+        } else {
+            $mform->setType('title', PARAM_CLEANHTML);
+        }
+        $mform->addRule('title', null, 'required', null, 'client');
+        $mform->addRule('title', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+        // Templet summary
+        $label = get_string('templetsummary', 'teamwork');
+        $mform->addElement('editor', 'summary', $label, array('rows' => 10), array('maxfiles' => EDITOR_UNLIMITED_FILES,
+            'noclean' => true, 'context' => null, 'subdirs' => true));
+        $mform->setType('summary', PARAM_RAW); // no XSS prevention here, users must be trusted
+
+
+        // Participation settings --------------------------------------------------------
+        $mform->addElement('header', 'participationsettings', get_string('participationsettings', 'teamwork'));
+		$options = array();
+        for ($i=1; $i<=20; $i++) {
+            $options[$i] = $i;
+        }
+        $mform->addElement('select', 'teamminmembers', get_string('teamminmembers', 'teamwork'), $options);
+		$mform->addElement('select', 'teammaxmembers', get_string('teammaxmembers', 'teamwork'), $options);
+
+		for ($i=1; $i<=10; $i++) {
+            $options[$i] = $i;
+        }
+        $mform->addElement('select', 'teamlimit', get_string('teamlimit', 'teamwork'), $options);
+		$mform->addHelpButton('teamlimit', 'teamlimit', 'teamwork');
+
+		// Submission settings --------------------------------------------------------
+        $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'teamwork'));
+		$label = get_string('displaysubmissions', 'teamwork');
+        $mform->addElement('checkbox', 'displaysubmissions', $label);
+
+        // Assessment settings---------------------------------------------------------------
+        $mform->addElement('header', 'assessmentsettings', get_string('assessmentsettings', 'teamwork'));
+		$label = get_string('assessmentanonymous', 'teamwork');
+        $mform->addElement('checkbox', 'assessmentanonymous', $label);
+        $label = get_string('assessfirst', 'teamwork');
+        $mform->addElement('checkbox', 'assessfirst', $label);
+        $options = array();
+        for ($i=1; $i<=100; $i++) {
+            $options[$i] = $i;
+        }
+        $label = get_string('scoremin', 'teamwork');
+        $mform->addElement('select', 'scoremin', get_string('scoremin', 'teamwork'), $options);
+        $label = get_string('scoremax', 'teamwork');
+        $mform->addElement('select', 'scoremax', get_string('scoremax', 'teamwork'), $options);
+
+		// Phase settings---------------------------------------------------------------
+        $mform->addElement('header', 'phasesettings', get_string('phasesettings', 'teamwork'));
+
+        $mform->registerNoSubmitButton('phaseadd');
+        $mform->addElement('submit', 'phaseadd', get_string('phaseadd', 'teamwork'));
+
+        for($i=1;$i<=$this->phasenum;$i++){
+			$mform->addElement('header', 'phase_'.$i, get_string('phasenumber', 'teamwork', $i));
+			$mform->addElement('text', 'phasename_'.$i, get_string('phasename', 'teamwork'));
+			if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('phasename_'.$i, PARAM_TEXT);
+        	} else {
+            	$mform->setType('phasename_'.$i, PARAM_CLEANHTML);
+        	}
+        	$mform->addRule('phasename_'.$i, null, 'required', null, 'client');
+        	$mform->addRule('phasename_'.$i, get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+			$mform->addElement('editor', 'phasedescription_'.$i, get_string('phasedescription', 'teamwork'), array('rows' => 10), array('maxfiles' => EDITOR_UNLIMITED_FILES,
+            'noclean' => true, 'context' => null, 'subdirs' => true));
+        	$mform->setType('phasedescription_'.$i, PARAM_RAW); // no XSS prevention here, users must be trusted
+        	$label = get_string('needassess', 'teamwork');
+        	$mform->addElement('checkbox', 'needassess', $label);
+			$mform->addElement('date_time_selector', 'phasestart_'.$i, get_string('phasestart', 'teamwork'),array('optional' => false));
+			$mform->addElement('date_time_selector', 'phaseend_'.$i, get_string('phaseend', 'teamwork'),array('optional' => false));
+		}
+
+		//Hidden------------------------------------------------------------------------
+        $mform->addElement('hidden', 'teamwork', $this->teamworkid);   
+        $mform->setType('teamwork', PARAM_INT);
+        $mform->addElement('hidden', 'instance', $this->instanceid);
+        $mform->setType('instance', PARAM_INT);
+        $mform->addElement('hidden', 'templet', $this->templet);
+        $mform->setType('templet', PARAM_INT);
+        $mform->addElement('hidden', 'currentphase', $this->currentphase);
+        $mform->setType('currentphase', PARAM_INT);
         $mform->addElement('hidden', 'phasenum', $this->phasenum);
         $mform->setType('phasenum', PARAM_INT);
 		$mform->setConstants(array('phasenum' => $this->phasenum));

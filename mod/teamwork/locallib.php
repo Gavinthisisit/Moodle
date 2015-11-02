@@ -726,7 +726,7 @@ class teamwork {
      * @param int $limitnum Return a subset containing this many records in total (optional, required if $limitfrom is set)
      * @return array of records or an empty array
      */
-    public function get_submissions($authorid='all', $groupid=0, $limitfrom=0, $limitnum=0) {
+    public function get_submissions($authorid='all', $phase=0, $groupid=0, $limitfrom=0, $limitnum=0) {
         global $DB;
 
         $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
@@ -742,7 +742,7 @@ class teamwork {
             $params['groupid'] = $groupid;
         }
         $sql .= " LEFT JOIN {user} t ON (s.gradeoverby = t.id)
-                 WHERE s.example = 0 AND s.teamworkid = :teamworkid";
+                 WHERE s.example = 0 AND s.phase = $phase AND s.teamworkid = :teamworkid";
 
         if ('all' === $authorid) {
             // no additional conditions
@@ -760,7 +760,7 @@ class teamwork {
         return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
     }
 
-	public function get_instance_submissions($instanceid, $limitfrom=0, $limitnum=0) {
+	public function get_instance_submissions($instanceid, $phase, $limitfrom=0, $limitnum=0) {
         global $DB;
 
         $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
@@ -773,7 +773,7 @@ class teamwork {
                   JOIN {user} u ON (s.authorid = u.id)";
 
         $sql .= " LEFT JOIN {user} t ON (s.gradeoverby = t.id)
-                 WHERE s.instance = $instanceid AND s.teamworkid = :teamworkid";
+                 WHERE s.instance = $instanceid AND s.phase = $phase AND s.teamworkid = :teamworkid";
 
         list($sort, $sortparams) = users_order_by_sql('u');
         $sql .= " ORDER BY $sort";

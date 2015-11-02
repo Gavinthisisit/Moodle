@@ -384,3 +384,4 @@ $string['activitysituation'] = '活动情况';
 $string['fen'] = '分'；
 $string['de'] = '的第';
 $string['assessments'] = '阶段评价区';
+$string['needassess'] = '需要评价';

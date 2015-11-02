@@ -33,6 +33,7 @@ require_once($CFG->libdir.'/completionlib.php');
 $id         = optional_param('id', 0, PARAM_INT); // course_module ID, or
 $w          = optional_param('w', 0, PARAM_INT);  // teamwork instance ID
 $instanceid  = optional_param('instance', 0, PARAM_INT);
+$phase  = optional_param('phase', 0, PARAM_INT);
 $page       = optional_param('page', 0, PARAM_INT);
 $perpage    = optional_param('perpage', null, PARAM_INT);
 
@@ -45,6 +46,7 @@ if ($id) {
     $course         = $DB->get_record('course', array('id' => $teamworkrecord->course), '*', MUST_EXIST);
     $cm             = get_coursemodule_from_instance('teamwork', $teamworkrecord->id, $course->id, false, MUST_EXIST);
 }
+
 
 require_login($course, true, $cm);
 require_capability('mod/teamwork:view', $PAGE->context);
@@ -72,13 +74,17 @@ echo $output->heading(format_string($instancerecord->title.'@'.$teamrecord->name
 $userplan = new teamwork_user_plan($teamwork, $instanceid);
 echo $output->render($userplan);
 
+if(empty($phase)) {
+	$phase = $instancerecord->currentphase;
+}
+
 // Output team submissions here
 print_collapsible_region_start('', 'workshop-viewlet-teamsubmission', get_string('teamsubmission', 'teamwork'));
 echo $output->box_start('generalbox teamsubmission');
 $countsubmissions = $teamwork->count_instance_submissions($instanceid);
 $perpage = get_user_preferences('teamwork_perpage', 10);
 $pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
-$submissions = $teamwork->get_instance_submissions($instanceid, $page * $perpage, $perpage);
+$submissions = $teamwork->get_instance_submissions($instanceid, $phase, $page * $perpage, $perpage);
 $shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
 echo $output->render($pagingbar);
 foreach ($submissions as $submission) {
@@ -99,7 +105,7 @@ if($ismember){
 	$countsubmissions = $teamwork->count_submissions($USER->id);
 	$perpage = get_user_preferences('teamwork_perpage', 10);
 	$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
-	$submissions = $teamwork->get_submissions($USER->id, 0, $page * $perpage, $perpage);
+	$submissions = $teamwork->get_submissions($USER->id, $phase, 0, $page * $perpage, $perpage);
 	$shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
 	echo $output->render($pagingbar);
 	foreach ($submissions as $submission) {
