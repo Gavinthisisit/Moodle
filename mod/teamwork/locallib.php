@@ -781,6 +781,25 @@ class teamwork {
         return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
     }
     
+    public function get_phase_discussions($forum, $limitfrom=0, $limitnum=0) {
+        global $DB;
+
+        $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
+        //$gradeoverbyfields = user_picture::fields('t', null, 'gradeoverbyx', 'over');
+        //$params            = array('teamwork' => $this->id);
+        $sql = "SELECT s.id, s.userid, s.timemodified, s.message, s.score,
+                       $authorfields
+                  FROM {teamworkforum_discussions} s
+                  JOIN {user} u ON (s.userid = u.id)";
+
+        $sql .= " WHERE s.teamworkforum = $forum";
+
+        list($sort, $sortparams) = users_order_by_sql('u');
+        $sql .= " ORDER BY $sort";
+
+        return $DB->get_records_sql($sql, array_merge($sortparams), $limitfrom, $limitnum);
+    }
+
     /**
      * Returns a submission record with the author's data
      *
@@ -931,14 +950,14 @@ class teamwork {
 	/**
      * Prepares renderable submission summary component
      *
-     * @param stdClass $record required by {@see teamwork_submission_summary}
+     * @param stdClass $record required by {@see teamwork_discussion_summary}
      * @param bool $showauthor show the author-related information
-     * @return teamwork_submission_summary
+     * @return teamwork_discussion_summary
      */
-    public function prepare_forum_summary(stdClass $record, $showauthor = false) {
+    public function prepare_discussion_summary(stdClass $record, $showauthor = false) {
 
-        $summary        = new teamwork_forum_summary($this, $record, $showauthor);
-        $summary->url   = new moodle_url('/mod/teamwork/forum/discuss.php',array('d' => $record->discussid));
+        $summary        = new teamwork_disscussion_summary($this, $record, $showauthor);
+        $summary->url   = new moodle_url('/mod/teamwork/forum/discuss.php',array('d' => $record->id));
 
         return $summary;
     }
@@ -3429,20 +3448,20 @@ class teamwork_submission_summary extends teamwork_submission_base implements re
 
 
 /**
- * Renderable object containing a basic set of information needed to display the submission summary
+ * Renderable object containing a basic set of information needed to display the discussion summary
  *
- * @see teamwork_renderer::render_teamwork_submission_summary
+ * @see teamwork_renderer::render_teamwork_discussion_summary
  */
-class teamwork_forum_summary extends teamwork_submission_base implements renderable {
+class teamwork_discussion_summary extends teamwork_submission_base implements renderable {
 
     /** @var int */
     public $id;
     /** @var string */
-    public $title;
+    public $message;
+    /** @var int */
+    public $score;
     /** @var string graded|notgraded */
     public $status;
-    /** @var int */
-    public $timecreated;
     /** @var int */
     public $timemodified;
     /** @var int */
@@ -3473,7 +3492,7 @@ class teamwork_forum_summary extends teamwork_submission_base implements rendera
      * of instances of this class
      */
     protected $fields = array(
-        'id', 'title', 'timecreated', 'timemodified',
+        'id', 'message', 'score', 'timemodified',
         'authorid', 'authorfirstname', 'authorlastname', 'authorfirstnamephonetic', 'authorlastnamephonetic',
         'authormiddlename', 'authoralternatename', 'authorpicture',
         'authorimagealt', 'authoremail');
@@ -4109,4 +4128,52 @@ function remove_incomplete_team($teamwork) {
 			$DB->delete_records('teamwork_team',array('id' => $team->id));
 		}
 	}
+} 
+
+/**
+ * Insert record for instance phase associate forum
+ */
+function add_associate_record($courseid, $teamworkid, $instanceid, $phaseid) {
+    global $DB;
+    
+    $forum = new stdClass();
+    $forum->name = $instanceid.get_string('de', 'teamwork').$phaseid.get_string('assessments', 'teamwork');
+    $forum->type = 'general';
+    $forum->course = $courseid;
+    $forum->intro = '';
+    $forum->introformat = 1;
+    $forum->assesstimestart = 0;
+    $forum->assesstimefinish = 0;
+    $forum->scale = 100;
+    $forum->maxbytes = 512000;
+    $forum->maxattchments = 9;
+    $forum->forcesubcribe = 0;
+    $forum->trackingtype = 1;
+    $forum->rsstype = 0;
+    $forum->rssarticles = 0;
+    $forum->timemodified = time();
+    $forum->warnafter = 0;
+    $forum->blockafter = 0;
+    $forum->blockperiod = 0;
+    $completiondiscussions = 0;
+    $completionreplies = 0;
+    $completionposts = 0;
+    $displaywordcount = 0;
+    if (!isset($forum->assessed)) {
+        $forum->assessed = 0;
+    }
+    if (!isset($forum->ratingtime) or !isset($forum->assessed)) {
+        $forum->assesstimestart  = 0;
+        $forum->assesstimefinish = 0;
+    }
+    
+    $forum->id = $DB->insert_record('teamworkforum', $forum);
+    
+    $associate = new stdClass();
+    $associate->teamwork = $teamworkid;
+    $associate->instance = $instanceid;
+    $associate->phase = $phaseid;
+    $associate->teamworkforum = $forum->id;
+
+    $DB->insert_record('teamworkforum_associate_phase', $associate);
 } 

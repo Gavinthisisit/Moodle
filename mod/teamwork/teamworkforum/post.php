@@ -22,11 +22,11 @@
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-require_once('../../config.php');
+echo 1;
+require_once('../../../config.php');
 require_once('lib.php');
 require_once($CFG->libdir.'/completionlib.php');
-
+echo 1;
 $reply   = optional_param('reply', 0, PARAM_INT);
 $teamworkforum   = optional_param('teamworkforum', 0, PARAM_INT);
 $edit    = optional_param('edit', 0, PARAM_INT);

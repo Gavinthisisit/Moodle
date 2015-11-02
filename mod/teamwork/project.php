@@ -112,7 +112,56 @@ if($ismember){
 	print_collapsible_region_end();
 }
 
+//$associate = $DB->get_record('teamworkforum_associate_phase', array('instance' => $instanceid, 'phase' => $phase));
+$associate = $DB->get_record('teamworkforum_associate_phase', array('instance' => $instanceid, 'phase' => 1));
+$phaseforum = $DB->get_record('teamworkforum', array('id' => $associate->teamworkforum));
+$assessed = $DB->get_record('teamworkforum_discussions', array('userid' => $USER->id));
+if (!$assessed && (!$ismember || has_capability('mod/teamwork:editsettings', $PAGE->context))) {
+	//Output the button for add discussion
+	echo '<div class="singlebutton forumaddnew">';
+    echo "<form id=\"newdiscussionform\" method=\"get\" action=\"$CFG->wwwroot/mod/teamwork/teamworkforum/post.php\">";
+    echo '<div>';
+    echo "<input type=\"hidden\" name=\"teamworkforum\" value=\"$phaseforum->id\" />";
+    switch ($phaseforum->type) {
+        case 'news':
+        case 'blog':
+            $buttonadd = get_string('addanewtopic', 'forum');
+            break;
+        case 'qanda':
+            $buttonadd = get_string('addanewquestion', 'forum');
+            break;
+        default:
+            $buttonadd = get_string('addanewdiscussion', 'forum');
+            break;
+    }
+    $buttonadd = get_string('addanewdiscussion', 'forum');
+    echo '<input type="submit" value="'.$buttonadd.'" />';
+    echo '</div>';
+    echo '</form>';
+    echo "</div>\n";
+}
 
+if ($ismember || $assessed || has_capability('mod/teamwork:editsettings', $PAGE->context)) {
+	//Ouput team phrase assessments here
+	print_collapsible_region_start('', 'workshop-viewlet-teamforum', get_string('teamforum', 'teamwork'));
+	echo $output->box_start('generalbox teamforum');
+	
+	$countsubmissions = count($DB->get_records('teamworkforum_discussions', array('teamworkforum' => $phaseforum->id)));
+	$perpage = get_user_preferences('teamwork_perpage', 10);
+	$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
+	//下面这个函数有问题
+	$discussions = $teamwork->get_phase_discussion($phaseforum->id, $page * $perpage, $perpage);
+	//$discussions = $teamwork->get_instance_submissions($instanceid, $page * $perpage, $perpage);
+	$shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
+	echo $output->render($pagingbar);
+	foreach ($discussions as $discussion) {
+	    echo $output->render($teamwork->prepare_discussion_summary($discussion, $shownames));
+	}
+	echo $output->render($pagingbar);
+	echo $output->perpage_selector($perpage);
+	echo $output->box_end();
+	print_collapsible_region_end();
+}
 
 
 echo $output->footer();

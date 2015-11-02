@@ -262,14 +262,14 @@ class mod_teamwork_renderer extends plugin_renderer_base {
     /**
      * Renders short summary of the submission
      *
-     * @param teamwork_submission_summary $summary
+     * @param teamwork_discussion_summary $summary
      * @return string text to be echo'ed
      */
-    protected function render_teamwork_forum_summary(teamwork_forum_summary $summary) {
+    protected function render_teamwork_discussion_summary(teamwork_discussion_summary $summary) {
 
         $o  = '';    // output HTML code
         $anonymous = $summary->is_anonymous();
-        $classes = 'submission-summary';
+        $classes = 'discussion-summary';
 
         if ($anonymous) {
             $classes .= ' anonymous';
@@ -287,7 +287,9 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         }
 
         $o .= $this->output->container_start($classes);  // main wrapper
-        $o .= html_writer::link($summary->url, format_string($summary->title), array('class' => 'title'));
+        $fen = get_string('grade', 'teamwork');
+        $o .= $this->output->container($summary->score, 'grade');
+        $o .= $this->output->container($fen, 'fen');
 
         if (!$anonymous) {
             $author             = new stdClass();
@@ -299,15 +301,16 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $a                  = new stdClass();
             $a->name            = fullname($author);
             $a->url             = $userurl->out();
-            $byfullname         = get_string('byfullname', 'teamwork', $a);
+            $byfullname         = get_string('postbyfullname', 'teamwork', $a);
 
             $oo  = $this->output->container($userpic, 'picture');
             $oo .= $this->output->container($byfullname, 'fullname');
             $o  .= $this->output->container($oo, 'author');
         }
+        $o .= html_writer::link($summary->url, format_string($summary->message), array('class' => 'description'));
 
-        $created = get_string('userdatecreated', 'teamwork', userdate($summary->timecreated));
-        $o .= $this->output->container($created, 'userdate created');
+        //$created = get_string('userdatecreated', 'teamwork', userdate($summary->timecreated));
+        //$o .= $this->output->container($created, 'userdate created');
 
         if ($summary->timemodified > $summary->timecreated) {
             $modified = get_string('userdatemodified', 'teamwork', userdate($summary->timemodified));
@@ -318,7 +321,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $o .= $this->output->container_end(); // end of the main wrapper
         return $o;
     }
-
+    
     /**
      * Renders full teamwork example submission
      *
