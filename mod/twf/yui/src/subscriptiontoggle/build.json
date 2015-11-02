@@ -1,0 +1,10 @@
+{
+    "name": "moodle-mod_twf-subscriptiontoggle",
+    "builds": {
+        "moodle-mod_twf-subscriptiontoggle": {
+            "jsfiles": [
+                "toggle.js"
+            ]
+        }
+    }
+}

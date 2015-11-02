@@ -1,0 +1,59 @@
+This files describes API changes in /mod/twf/*,
+information provided here is intended especially for developers.
+
+=== 2.8 ===
+ * The following functions have all been marked as deprecated. Many of
+   these have not been supported in many releases and should not be relied
+   upon:
+     twf_count_unrated_posts
+     twf_tp_count_discussion_read_records
+     twf_get_user_discussions
+     twf_tp_count_twf_posts
+     twf_tp_count_twf_read_records
+     twf_get_open_modes
+     twf_get_child_posts
+     twf_get_discussion_posts
+     twf_get_ratings
+     twf_get_tracking_link
+     twf_tp_count_discussion_unread_posts
+     twf_convert_to_roles
+     twf_tp_get_read_records
+     twf_tp_get_discussion_read_records
+     twf_user_enrolled
+     twf_user_can_view_post
+ * The following functions have been deprecated and replaced. Please see the phpdoc for each on the new function to use instead:
+   * twf_is_subscribed
+   * twf_subscribe
+   * twf_unsubscribe
+   * twf_subscribed_users
+   * twf_is_forcesubscribed
+   * twf_forcesubscribe
+   * twf_get_forcesubscribed
+   * twf_get_subscribed_twfs
+   * twf_get_optional_subscribed_twfs
+   * twf_get_potential_subscribers
+ * External function mod_twf_external::get_twf_discussions has been deprecated.
+   Use mod_twf_external::get_twf_discussions_paginated instead.
+
+=== 2.6 ===
+
+* The file post_form.php should not be included, the class it contained has
+  been moved so that it can benefit from autoloading.
+* The function twf_shorten_post() has been deprecated. It was doing a poor
+  job of shortening twf post text and the shorten_text() function does a
+  much better job.
+* The constant FORUM_TRACKING_ON has been depreciated and replaced by
+  FORUM_TRACKING_FORCED. The value between them is maintained, so they are
+  interchangeable, but code should migrate to the new name.
+
+=== 2.5 ===
+
+The function twf_check_throttling has been changed so that a warning object is returned when a user has reached the 'Post threshold for warning' or
+'Post threshold for blocking' setting, rather than echoing this on screen. This allows the warning to be moved inside the post form as it can be added
+as a HTML element, where it is more noticeable. False is returned if there is no need to warn, or restrict the user from posting - see MDL-39182.
+
+=== 2.3.5, 2.4.2 ===
+
+* mod/twf:allowforcesubscribe capability will be forcefully assigned to frontpage role, as it was mistakenly missed off
+when the capability was initially created. If you don't want users with frontpage role to get twf (with forcesubscribe) emails,
+then please remove this capability for frontpage role.

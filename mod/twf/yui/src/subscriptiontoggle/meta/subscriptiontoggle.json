@@ -1,0 +1,8 @@
+{
+    "moodle-mod_twf-subscriptiontoggle": {
+        "requires": [
+            "base-base",
+            "io-base"
+        ]
+    }
+}
