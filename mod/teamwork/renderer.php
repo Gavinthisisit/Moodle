@@ -287,9 +287,8 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         }
 
         $o .= $this->output->container_start($classes);  // main wrapper
-        $fen = get_string('grade', 'teamwork');
-        $o .= $this->output->container($summary->score, 'grade');
-        $o .= $this->output->container($fen, 'fen');
+        $grade = get_string('fen', 'teamwork', $summary->score);
+        $o .= html_writer::link($summary->url, format_string($grade), array('class' => 'grade'));
 
         if (!$anonymous) {
             $author             = new stdClass();
@@ -308,9 +307,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $o  .= $this->output->container($oo, 'author');
         }
         $o .= html_writer::link($summary->url, format_string($summary->message), array('class' => 'description'));
-
-        //$created = get_string('userdatecreated', 'teamwork', userdate($summary->timecreated));
-        //$o .= $this->output->container($created, 'userdate created');
 
         if ($summary->timemodified > $summary->timecreated) {
             $modified = get_string('userdatemodified', 'teamwork', userdate($summary->timemodified));

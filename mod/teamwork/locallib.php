@@ -781,23 +781,20 @@ class teamwork {
         return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
     }
     
-    public function get_phase_discussions($forum, $limitfrom=0, $limitnum=0) {
+    public function get_phase_discussions($forum, $instanceid, $phaseid, $limitfrom=0, $limitnum=0) {
         global $DB;
 
+        $teamworkid = $this->id;
         $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
-        //$gradeoverbyfields = user_picture::fields('t', null, 'gradeoverbyx', 'over');
-        //$params            = array('teamwork' => $this->id);
-        $sql = "SELECT s.id, s.userid, s.timemodified, s.message, s.score,
+        $sql = "SELECT s.id, s.userid, s.timemodified, s.message, s.score, s.name,
                        $authorfields
-                  FROM {teamworkforum_discussions} s
+                  FROM {twf_discussions} s
                   JOIN {user} u ON (s.userid = u.id)";
 
-        $sql .= " WHERE s.teamworkforum = $forum";
+        $sql .= " WHERE s.twf = $forum AND s.teamwork = $teamworkid 
+                        AND s.instance = $instanceid AND s.phase = $phaseid";
 
-        list($sort, $sortparams) = users_order_by_sql('u');
-        $sql .= " ORDER BY $sort";
-
-        return $DB->get_records_sql($sql, array_merge($sortparams), $limitfrom, $limitnum);
+        return $DB->get_records_sql($sql, null, $limitfrom, $limitnum);
     }
 
     /**
@@ -3454,12 +3451,14 @@ class teamwork_submission_summary extends teamwork_submission_base implements re
  */
 class teamwork_discussion_summary extends teamwork_submission_base implements renderable {
 
-    /** @var int */
+     /** @var int */
     public $id;
     /** @var string */
     public $message;
     /** @var int */
     public $score;
+    /** @var string */
+    public $name;
     /** @var string graded|notgraded */
     public $status;
     /** @var int */
@@ -3492,7 +3491,7 @@ class teamwork_discussion_summary extends teamwork_submission_base implements re
      * of instances of this class
      */
     protected $fields = array(
-        'id', 'message', 'score', 'timemodified',
+        'id', 'message', 'score', 'name', 'timemodified',
         'authorid', 'authorfirstname', 'authorlastname', 'authorfirstnamephonetic', 'authorlastnamephonetic',
         'authormiddlename', 'authoralternatename', 'authorpicture',
         'authorimagealt', 'authoremail');
@@ -4133,41 +4132,9 @@ function remove_incomplete_team($teamwork) {
 /**
  * Insert record for instance phase associate forum
  */
+/*
 function add_associate_record($courseid, $teamworkid, $instanceid, $phaseid) {
     global $DB;
-    
-    $forum = new stdClass();
-    $forum->name = $instanceid.get_string('de', 'teamwork').$phaseid.get_string('assessments', 'teamwork');
-    $forum->type = 'general';
-    $forum->course = $courseid;
-    $forum->intro = '';
-    $forum->introformat = 1;
-    $forum->assesstimestart = 0;
-    $forum->assesstimefinish = 0;
-    $forum->scale = 100;
-    $forum->maxbytes = 512000;
-    $forum->maxattchments = 9;
-    $forum->forcesubcribe = 0;
-    $forum->trackingtype = 1;
-    $forum->rsstype = 0;
-    $forum->rssarticles = 0;
-    $forum->timemodified = time();
-    $forum->warnafter = 0;
-    $forum->blockafter = 0;
-    $forum->blockperiod = 0;
-    $completiondiscussions = 0;
-    $completionreplies = 0;
-    $completionposts = 0;
-    $displaywordcount = 0;
-    if (!isset($forum->assessed)) {
-        $forum->assessed = 0;
-    }
-    if (!isset($forum->ratingtime) or !isset($forum->assessed)) {
-        $forum->assesstimestart  = 0;
-        $forum->assesstimefinish = 0;
-    }
-    
-    $forum->id = $DB->insert_record('teamworkforum', $forum);
     
     $associate = new stdClass();
     $associate->teamwork = $teamworkid;
@@ -4177,3 +4144,4 @@ function add_associate_record($courseid, $teamworkid, $instanceid, $phaseid) {
 
     $DB->insert_record('teamworkforum_associate_phase', $associate);
 } 
+*/

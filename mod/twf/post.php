@@ -39,6 +39,10 @@ $syx_teamwork = optional_param('teamwork', null, PARAM_INT);
 $syx_instance = optional_param('instance', null, PARAM_INT);
 $syx_phase = optional_param('phase', null, PARAM_INT);
 
+//var_dump($syx_teamwork);
+//var_dump($syx_phase);
+//var_dump($syx_instance);
+//die;
 $PAGE->set_url('/mod/twf/post.php', array(
         'reply' => $reply,
         'twf' => $twf,
@@ -47,7 +51,7 @@ $PAGE->set_url('/mod/twf/post.php', array(
         'prune' => $prune,
         'name'  => $name,
         'confirm'=>$confirm,
-        'groupid'=>$groupid,
+        'groupid'=>$groupid
         ));
 //these page_params will be passed as hidden variables later in the form.
 $page_params = array('reply'=>$reply, 'twf'=>$twf, 'edit'=>$edit);
@@ -593,7 +597,10 @@ $mform_post = new mod_twf_post_form('post.php', array('course' => $course,
                                                                 null, $cm),
                                                         'thresholdwarning' => $thresholdwarning,
                                                         'edit' => $edit,
-                                                        'syx_newdiscussion' => $syx_newdiscussion), 'post', '', array('id' => 'mformtwf'));
+                                                        'syx_newdiscussion' => $syx_newdiscussion,
+                                                        'syx_instance' => $syx_instance,
+                                                        'syx_phase' => $syx_phase,
+                                                        'syx_teamwork'=> $syx_teamwork), 'post', '', array('id' => 'mformtwf'));
 
 $draftitemid = file_get_submitted_draft_itemid('attachments');
 file_prepare_draft_area($draftitemid, $modcontext->id, 'mod_twf', 'attachment', empty($post->id)?null:$post->id, mod_twf_post_form::attachment_options($twf));
@@ -704,9 +711,13 @@ if ($mform_post->is_cancelled()) {
     $fromform->itemid        = $fromform->message['itemid'];
     $fromform->messageformat = $fromform->message['format'];
     $fromform->message       = $fromform->message['text'];
+    /*
     $fromform->teamwork      = $syx_teamwork;
     $fromform->phase         = $syx_phase;
-    $fromform->instance      = $syx_instance;
+    */
+    $fromform->instance      = $fromform->instace;
+    
+    //var_dump($fromform);die;
     // WARNING: the $fromform->message array has been overwritten, do not use it anymore!
     $fromform->messagetrust  = trusttext_trusted($modcontext);
 

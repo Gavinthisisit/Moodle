@@ -76,6 +76,53 @@
 }
 
 /**
+ * Submission - one line summary display
+ */
+.path-mod-teamwork .discussion-summary {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.path-mod-teamwork .discussion-summary .grade,
+.path-mod-teamwork .discussion-summary .author,
+.path-mod-teamwork .discussion-summary .author .fullname,
+.path-mod-teamwork .discussion-summary .author .picture {
+    display: inline;
+}
+
+.path-mod-teamwork .discussion-summary .grade,
+.path-mod-teamwork .discussion-summary .userdate,
+.path-mod-teamwork .discussion-summary .grade-status {
+    margin: 0px 0px 0px 40px;
+}
+
+.path-mod-teamwork .discussion-summary .author {
+    margin-left: 1ex;
+}
+
+.path-mod-teamwork .discussion-summary.anonymous .grade,
+.path-mod-teamwork .discussion-summary.anonymous .author,
+.path-mod-teamwork .discussion-summary.anonymous .userdate,
+.path-mod-teamwork .discussion-summary.anonymous .grade-status {
+    margin: 0px 0px 0px 5px;
+}
+
+.path-mod-teamwork .discussion-summary .userdate {
+    font-size: x-small;
+    color: #333;
+}
+
+.path-mod-teamwork .discussion-summary .userdate span {
+    font-style: italic;
+}
+
+.path-mod-teamwork .discussion-summary .author .picture {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+/**
  * Submission - full display
  */
 .path-mod-teamwork .submission-full {

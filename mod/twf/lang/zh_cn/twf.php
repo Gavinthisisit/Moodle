@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['score'] = '分数';
 $string['score_rules_help'] = '分数一旦提交就不能修改，请填写一个整数，不要包含其他字符';
 $string['activityoverview'] = '新评价区帖子';
-$string['addanewdiscussion'] = '开启一个新话题';
+$string['addanewdiscussion'] = '准备您的评价';
 $string['addanewquestion'] = '添加一个新问题';
 $string['addanewtopic'] = '添加一个新话题';
 $string['advancedsearch'] = '高级搜索';

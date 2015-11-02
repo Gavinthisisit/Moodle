@@ -83,7 +83,7 @@ class mod_twf_post_form extends moodleform {
         global $CFG, $OUTPUT;
 
         $mform =& $this->_form;
-
+        //var_dump($this->_customdata);die;
         $course = $this->_customdata['course'];
         $cm = $this->_customdata['cm'];
         $coursecontext = $this->_customdata['coursecontext'];
@@ -94,7 +94,9 @@ class mod_twf_post_form extends moodleform {
         $edit = $this->_customdata['edit'];
         $thresholdwarning = $this->_customdata['thresholdwarning'];
         $syx_newdiscussion = $this->_customdata['syx_newdiscussion'];
-        //$syx_phase = $this->_customdata['syx_phase'];
+        $syx_phase = $this->_customdata['syx_phase'];
+        $syx_instance = $this->_customdata['syx_instance'];
+        $syx_teamwork = $this->_customdata['syx_teamwork'];
 
         $mform->addElement('header', 'general', '');//fill in the data depending on page params later using set_data
 
@@ -250,16 +252,16 @@ class mod_twf_post_form extends moodleform {
         }
 
         $this->add_action_buttons(true, $submit_string);
-        /*
-        $mform->addElement('hidden', 'teamwork');
+        //var_dump($syx_teamwork);die;
+        $mform->addElement('hidden', 'teamwork', $syx_teamwork);
         $mform->setType('teamwork', PARAM_INT);
-
-        $mform->addElement('hidden', 'phase');
+        
+        $mform->addElement('hidden', 'phase', $syx_phase);
         $mform->setType('phase', PARAM_INT);
 
-        $mform->addElement('hidden', 'instace');
+        $mform->addElement('hidden', 'instace', $syx_instance);
         $mform->setType('instace', PARAM_INT);
-        */
+        
         $mform->addElement('hidden', 'course');
         $mform->setType('course', PARAM_INT);
 
