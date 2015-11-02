@@ -684,7 +684,6 @@ if ($mform_post->is_cancelled()) {
         redirect(new moodle_url('/mod/forum/discuss.php', array('d' => $discussion->id)));
     }
 } else if ($fromform = $mform_post->get_data()) {
-
     if (empty($SESSION->fromurl)) {
         $errordestination = "$CFG->wwwroot/mod/forum/view.php?f=$forum->id";
     } else {
@@ -728,7 +727,6 @@ if ($mform_post->is_cancelled()) {
             if (!forum_user_can_post_discussion($forum, $fromform->groupinfo, null, $cm, $modcontext)) {
                 print_error('cannotupdatepost', 'forum');
             }
-
             $DB->set_field('forum_discussions' ,'groupid' , $fromform->groupinfo, array('firstpost' => $fromform->id));
         }
 
@@ -907,7 +905,7 @@ if ($mform_post->is_cancelled()) {
             if (!forum_user_can_post_discussion($forum, $group, -1, $cm, $modcontext)) {
                 print_error('cannotcreatediscussion', 'forum');
             }
-
+            //var_dump($discussion);die;
             $discussion->groupid = $group;
             $message = '';
             if ($discussion->id = forum_add_discussion($discussion, $mform_post, $message)) {
@@ -919,6 +917,7 @@ if ($mform_post->is_cancelled()) {
                         'forumid' => $forum->id,
                     )
                 );
+
                 $event = \mod_forum\event\discussion_created::create($params);
                 $event->add_record_snapshot('forum_discussions', $discussion);
                 $event->trigger();

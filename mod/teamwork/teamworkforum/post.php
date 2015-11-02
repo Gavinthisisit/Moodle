@@ -97,6 +97,11 @@ if (!isloggedin() or isguestuser()) {
 
 require_login(0, false);   // Script is useless unless they're logged in
 
+$syx_new_discussion = false;
+if (!empty($teamworkforum)) {
+    $syx_new_discussion = true;
+}
+
 if (!empty($teamworkforum)) {      // User is starting a new discussion in a teamworkforum
     if (! $teamworkforum = $DB->get_record("teamworkforum", array("id" => $teamworkforum))) {
         print_error('invalidteamworkforumid', 'teamworkforum');
@@ -583,7 +588,8 @@ $mform_post = new mod_teamworkforum_post_form('post.php', array('course' => $cou
                                                         'subscribe' => \mod_teamworkforum\subscriptions::is_subscribed($USER->id, $teamworkforum,
                                                                 null, $cm),
                                                         'thresholdwarning' => $thresholdwarning,
-                                                        'edit' => $edit), 'post', '', array('id' => 'mformteamworkforum'));
+                                                        'edit' => $edit,
+                                                        'newdiscussion' => $syx_new_discussion), 'post', '', array('id' => 'mformteamworkforum'));
 
 $draftitemid = file_get_submitted_draft_itemid('attachments');
 file_prepare_draft_area($draftitemid, $modcontext->id, 'mod_teamworkforum', 'attachment', empty($post->id)?null:$post->id, mod_teamworkforum_post_form::attachment_options($teamworkforum));

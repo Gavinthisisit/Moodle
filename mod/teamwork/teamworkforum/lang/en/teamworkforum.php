@@ -22,7 +22,8 @@
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+$string['score'] = '分数';
+$string['score_rules_help'] = '分数一旦提交就不能修改，请填写一个整数，不要包含其他字符';
 $string['activityoverview'] = 'There are new teamworkforum posts';
 $string['addanewdiscussion'] = 'Add a new discussion topic';
 $string['addanewquestion'] = 'Add a new question';

@@ -93,6 +93,7 @@ class mod_teamworkforum_post_form extends moodleform {
         $subscribe = $this->_customdata['subscribe'];
         $edit = $this->_customdata['edit'];
         $thresholdwarning = $this->_customdata['thresholdwarning'];
+        $is_new_discussion = $this->_customdata['newdiscussion'];
 
         $mform->addElement('header', 'general', '');//fill in the data depending on page params later using set_data
 
@@ -110,6 +111,13 @@ class mod_teamworkforum_post_form extends moodleform {
         $mform->addRule('subject', get_string('required'), 'required', null, 'client');
         $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
+        if ($is_new_discussion) {
+            $mform->addElement('text', 'score', get_string('score', 'forum'));
+            $mform->setType('score', PARAM_INT);
+            $mform->addRule('score', get_string('required'), 'required', null, 'client');
+            $mform->addHelpButton('score', 'score_rules', 'forum');
+        }
+        
         $mform->addElement('editor', 'message', get_string('message', 'teamworkforum'), null, self::editor_options($modcontext, (empty($post->id) ? null : $post->id)));
         $mform->setType('message', PARAM_RAW);
         $mform->addRule('message', get_string('required'), 'required', null, 'client');
