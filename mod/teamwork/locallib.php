@@ -952,8 +952,8 @@ class teamwork {
      * @return teamwork_discussion_summary
      */
     public function prepare_discussion_summary(stdClass $record, $showauthor = false) {
-
-        $summary        = new teamwork_disscussion_summary($this, $record, $showauthor);
+        
+        $summary        = new teamwork_discussion_summary($this, $record, $showauthor);
         $summary->url   = new moodle_url('/mod/teamwork/forum/discuss.php',array('d' => $record->id));
 
         return $summary;
@@ -3348,7 +3348,7 @@ abstract class teamwork_submission_base {
      * @param array $options additional properties
      */
     public function __construct(teamwork $teamwork, stdClass $submission, $showauthor = false) {
-
+     
         $this->teamwork = $teamwork;
 
         foreach ($this->fields as $field) {
