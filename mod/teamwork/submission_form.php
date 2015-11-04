@@ -58,6 +58,9 @@ class teamwork_submission_form extends moodleform {
         $mform->addElement('hidden', 'id', $current->id);
         $mform->setType('id', PARAM_INT);
         
+        $mform->addElement('hidden', 'teamwork', $teamwork);
+        $mform->setType('teamwork', PARAM_INT);
+        
         $mform->addElement('hidden', 'instance', $instanceid);
         $mform->setType('instance', PARAM_INT);
         

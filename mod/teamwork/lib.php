@@ -1247,7 +1247,7 @@ function teamwork_pluginfile($course, $cm, $context, $filearea, array $args, $fo
         if (!$submission = $DB->get_record('teamwork_submissions', array('id' => $itemid, 'teamworkid' => $teamwork->id))) {
             return false;
         }
-
+/*
         // make sure the user is allowed to see the file
         if (empty($submission->example)) {
             if ($USER->id != $submission->authorid) {
@@ -1279,7 +1279,7 @@ function teamwork_pluginfile($course, $cm, $context, $filearea, array $args, $fo
                 }
             }
         }
-
+*/
         $fs = get_file_storage();
         $relativepath = implode('/', $args);
         $fullpath = "/$context->id/mod_teamwork/$filearea/$itemid/$relativepath";

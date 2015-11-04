@@ -115,7 +115,7 @@ if ($edit) {
     $submission     = file_prepare_standard_filemanager($submission, 'attachment', $attachmentopts, $teamwork->context,
                                         'mod_teamwork', 'submission_attachment', $submission->id);
 
-    $mform          = new teamwork_submission_form($PAGE->url, array('current' => $submission, 'teamwork' => $teamwork, 'instanceid' => $instanceid,
+    $mform          = new teamwork_submission_form($PAGE->url, array('current' => $submission, 'teamwork' => $teamworkrecord->id, 'instanceid' => $instanceid,
                                                     'contentopts' => $contentopts, 'attachmentopts' => $attachmentopts, 'phase' => $instancerecord->currentphase));
 
     if ($mform->is_cancelled()) {
@@ -125,12 +125,13 @@ if ($edit) {
 
         $timenow = time();
         if (is_null($submission->id)) {
-            $formdata->teamworkid     = $teamwork->id;
+            
             $formdata->example        = 0;
             $formdata->authorid       = $USER->id;
             $formdata->timecreated    = $timenow;
             $formdata->feedbackauthorformat = editors_get_preferred_format();
         }
+        $formdata->teamworkid     = $teamwork->id;
         $formdata->timemodified       = $timenow;
         $formdata->title              = trim($formdata->title);
         $formdata->content            = '';          // updated later
@@ -189,7 +190,7 @@ if ($edit) {
         $event = \mod_teamwork\event\assessable_uploaded::create($params);
         $event->set_legacy_logdata($logdata);
         $event->trigger();
-        
+
 		$rtn_url = new moodle_url("project.php",array('w' => $formdata->teamworkid, 'instance' => $formdata->instance));
         redirect($rtn_url);
     }
