@@ -129,7 +129,7 @@
     groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/forum/view.php?id=' . $cm->id);
 
     $SESSION->fromdiscussion = qualified_me();   // Return here if we post or set subscription etc
-
+    
 
 /// Print settings and things across the top
 

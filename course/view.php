@@ -110,7 +110,7 @@
             require_capability('moodle/course:viewhiddensections', $context);
         }
     }
-
+    
     // Fix course format if it is no longer installed
     $course->format = course_get_format($course)->get_format();
 

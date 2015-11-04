@@ -3160,7 +3160,7 @@ function twf_make_mail_post($course, $cm, $twf, $discussion, $post, $userfrom, $
  */
 function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false, $reply=false, $link=false,
                           $footer="", $highlight="", $postisread=null, $dummyifcantsee=true, $istracked=null, $return=false) {
-    global $USER, $CFG, $OUTPUT;
+    global $USER, $CFG, $OUTPUT, $DB;
 
     require_once($CFG->libdir . '/filelib.php');
 
@@ -3171,6 +3171,7 @@ function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false,
 
     $post->course = $course->id;
     $post->twf  = $twf->id;
+
     $post->message = file_rewrite_pluginfile_urls($post->message, 'pluginfile.php', $modcontext->id, 'mod_twf', 'post', $post->id);
     if (!empty($CFG->enableplagiarism)) {
         require_once($CFG->libdir.'/plagiarismlib.php');
@@ -3217,7 +3218,7 @@ function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false,
             return;
         }
         $output .= html_writer::tag('a', '', array('id'=>'p'.$post->id));
-        $output .= html_writer::start_tag('div', array('class'=>'twfpost clearfix',
+        $output .= html_writer::start_tag('div', array('class'=>'forumpost clearfix',
                                                        'role' => 'region',
                                                        'aria-label' => get_string('hiddentwfpost', 'twf')));
         $output .= html_writer::start_tag('div', array('class'=>'row header'));
@@ -3264,7 +3265,17 @@ function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false,
     // Build an object that represents the posting user
     $postuser = new stdClass;
     $postuserfields = explode(',', user_picture::fields());
-    $postuser = username_load_fields_from_object($postuser, $post, null, $postuserfields);
+
+    if ($USER->id == $post->userid) {
+        $postuser = username_load_fields_from_object($postuser, $post, null, $postuserfields);
+    }
+    else {
+        // change in course_server.
+        $any_student = $DB->get_record('user', array('id' => '9'));
+        $postuser = username_load_fields_from_object($postuser, $any_student, null, $postuserfields);   
+    }
+    //var_dump($postuser);
+
     $postuser->id = $post->userid;
     $postuser->fullname    = fullname($postuser, $cm->cache->caps['moodle/site:viewfullnames']);
     $postuser->profilelink = new moodle_url('/user/view.php', array('id'=>$post->userid, 'course'=>$course->id));
@@ -3397,7 +3408,7 @@ function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false,
     $postbyuser->user = $postuser->fullname;
     $discussionbyuser = get_string('postbyuser', 'twf', $postbyuser);
     $output .= html_writer::tag('a', '', array('id'=>'p'.$post->id));
-    $output .= html_writer::start_tag('div', array('class'=>'twfpost clearfix'.$twfpostclass.$topicclass,
+    $output .= html_writer::start_tag('div', array('class'=>'forumpost clearfix'.$twfpostclass.$topicclass,
                                                    'role' => 'region',
                                                    'aria-label' => $discussionbyuser));
     $output .= html_writer::start_tag('div', array('class'=>'row header clearfix'));
@@ -5295,7 +5306,7 @@ function twf_user_can_see_post($twf, $discussion, $post, $user=NULL, $cm=NULL) {
 function twf_print_latest_discussions($course, $twf, $maxdiscussions = -1, $displayformat = 'plain', $sort = '',
                                         $currentgroup = -1, $groupmode = -1, $page = -1, $perpage = 100, $cm = null) {
     global $CFG, $USER, $OUTPUT;
-
+    //return;
     if (!$cm) {
         if (!$cm = get_coursemodule_from_instance('twf', $twf->id, $twf->course)) {
             print_error('invalidcoursemodule');
@@ -5454,7 +5465,7 @@ function twf_print_latest_discussions($course, $twf, $maxdiscussions = -1, $disp
     }
 
     if ($displayformat == 'header') {
-        echo '<table cellspacing="0" class="twfheaderlist">';
+        echo '<table cellspacing="0" class="forumheaderlist">';
         echo '<thead>';
         echo '<tr>';
         echo '<th class="header topic" scope="col">'.get_string('discussion', 'twf').'</th>';
@@ -5567,7 +5578,7 @@ function twf_print_latest_discussions($course, $twf, $maxdiscussions = -1, $disp
         } else {
             $strolder = get_string('olderdiscussions', 'twf');
         }
-        echo '<div class="twfolddiscuss">';
+        echo '<div class="forumolddiscuss">';
         echo '<a href="'.$CFG->wwwroot.'/mod/twf/view.php?f='.$twf->id.'&amp;showall=1">';
         echo $strolder.'</a> ...</div>';
     }

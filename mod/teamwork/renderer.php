@@ -267,6 +267,8 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      */
     protected function render_teamwork_discussion_summary(teamwork_discussion_summary $summary) {
 
+        $USER, $DB;
+
         $o  = '';    // output HTML code
         $anonymous = $summary->is_anonymous();
         $classes = 'discussion-summary';
@@ -292,8 +294,12 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 
         if (!$anonymous) {
             $author             = new stdClass();
+
+            // change in course_server.
+            $any_student = $DB->get_record('user', array('id' => '9'));
+
             $additionalfields = explode(',', user_picture::fields());
-            $author = username_load_fields_from_object($author, $summary, 'author', $additionalfields);
+            $author = username_load_fields_from_object($author, $any_student, 'author', $additionalfields);
             $userpic            = $this->output->user_picture($author, array('courseid' => $this->page->course->id, 'size' => 35));
             $userurl            = new moodle_url('/user/view.php',
                                             array('id' => $author->id, 'course' => $this->page->course->id));

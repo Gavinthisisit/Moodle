@@ -130,7 +130,6 @@
 
     $SESSION->fromdiscussion = qualified_me();   // Return here if we post or set subscription etc
 
-
 /// Print settings and things across the top
 
     // If it's a simple single discussion twf, we need to print the display
@@ -160,7 +159,8 @@
     if ($twf->type == 'qanda' && !has_capability('moodle/course:manageactivities', $context)) {
         echo $OUTPUT->notification(get_string('qandanotify','twf'));
     }
-
+    echo "该课程模块暂不可见";
+/*
     switch ($twf->type) {
         case 'single':
             if (!empty($discussions) && count($discussions) > 1) {
@@ -224,7 +224,7 @@
 
             break;
     }
-
+*/
     // Add the subscription toggle JS.
     $PAGE->requires->yui_module('moodle-mod_twf-subscriptiontoggle', 'Y.M.mod_twf.subscriptiontoggle.init');
 
