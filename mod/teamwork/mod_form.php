@@ -465,7 +465,7 @@ class teamwork_instance_form extends moodleform {
      * @return void
      */
     public function definition() {
-        global $CFG;
+        global $DB,$CFG;
 
         $teamworkconfig = get_config('teamwork');
         $mform = $this->_form;
@@ -549,7 +549,24 @@ class teamwork_instance_form extends moodleform {
 			$mform->addElement('date_time_selector', 'phasestart_'.$i, get_string('phasestart', 'teamwork'),array('optional' => false));
 			$mform->addElement('date_time_selector', 'phaseend_'.$i, get_string('phaseend', 'teamwork'),array('optional' => false));
 		}
-
+		
+		//Other instances with the same templet
+		$mform->addElement('header', 'syncsettings', get_string('syncsettings', 'teamwork'));
+		
+		$records = $DB->get_records('teamwork_instance',array('templet' => $this->templet));
+		$options = array();
+		foreach($records as $record) {
+				if($record->id != $this->instanceid) {
+					$team = $DB->get_record('teamwork_team',array('id' => $record->team));
+					$options[$record->id] = $team->name;
+				}
+		}
+		if(count($options)>0){
+			$mform->addElement('select', 'selectothers', get_string('selectothers', 'teamwork'), $options,array('multiple'=>'multiple', 'size'=>3));
+			$mform->addHelpButton('selectothers', 'selectothers', 'teamwork');
+		}
+		
+		
 		//Hidden------------------------------------------------------------------------
         $mform->addElement('hidden', 'teamwork', $this->teamworkid);   
         $mform->setType('teamwork', PARAM_INT);
