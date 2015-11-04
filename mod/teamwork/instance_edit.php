@@ -81,7 +81,21 @@ $mform->set_data($savedata);
 if ($mform->is_cancelled()) {
     redirect($teamwork->view_url());
 } elseif ($data = $mform->get_data()) {
+	if(!empty($data->selectothers)) {
+		$others = $data->selectothers;
+		$oldinstanceid = $data->instance;
+		unset($data->selectothers);
+		foreach($others as $other){
+    		$data->instance = $other;
+    		save_instance_data($course,$data);
+    	}
+    	$data->instance = $oldinstanceid;
+	}else{
+		unset($data->selectothers);
+	}
+	
     save_instance_data($course,$data);
+    
     redirect($teamwork->view_url());
 }
 
@@ -129,7 +143,7 @@ function save_instance_data($course,$data){
 		$newphase->description = $data->{'phasedescription_'.$i}['text'];
 		$newphase->timestart = $data->{'phasestart_'.$i};
 		$newphase->timeend = $data->{'phaseend_'.$i};
-		$newphase->needassess = $data->needassess;
+		$newphase->needassess = (int)$data->needassess;
 		$record = $DB->get_record('teamwork_instance_phase',array('instance'=>$instanceid,'orderid'=>$i));
 		if(!empty($record)){
 			$newphase->id = $record->id;

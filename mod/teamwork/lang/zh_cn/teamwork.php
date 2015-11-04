@@ -385,3 +385,6 @@ $string['fen'] = '{$a}分';
 $string['de'] = '的第';
 $string['assessments'] = '阶段评价区';
 $string['needassess'] = '需要评价';
+$string['syncsettings'] = '同步设置';
+$string['selectothers'] = '选择同项目的其它团队';
+$string['selectothers_help'] = '按住Shift键可同时选择多个';
