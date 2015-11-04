@@ -267,7 +267,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      */
     protected function render_teamwork_discussion_summary(teamwork_discussion_summary $summary) {
 
-        $USER, $DB;
+        $DB;
 
         $o  = '';    // output HTML code
         $anonymous = $summary->is_anonymous();
