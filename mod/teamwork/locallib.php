@@ -954,7 +954,7 @@ class teamwork {
     public function prepare_discussion_summary(stdClass $record, $showauthor = false) {
         
         $summary        = new teamwork_discussion_summary($this, $record, $showauthor);
-        $summary->url   = new moodle_url('/mod/teamwork/forum/discuss.php',array('d' => $record->id));
+        $summary->url   = new moodle_url('/mod/twf/discuss.php',array('d' => $record->id));
 
         return $summary;
     }

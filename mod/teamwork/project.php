@@ -152,7 +152,7 @@ if (!$assessed && (!$ismember || has_capability('mod/teamwork:editsettings', $PA
 
 if ($ismember || $assessed || has_capability('mod/teamwork:editsettings', $PAGE->context)) {
 	//Ouput team phrase assessments here	
-	$countsubmissions = count($DB->get_records('twf_discussions', array('twf' => $associate->twf)));
+	$countsubmissions = count($DB->get_records('twf_discussions', array('twf' => $associate->twf, 'teamwork' => $w, 'instance' => $instanceid, 'phase' => $phase)));
 	$perpage = get_user_preferences('teamwork_perpage', 10);
 	$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
 	$discussions = $teamwork->get_phase_discussions($associate->twf, $instanceid, $phase, $page * $perpage, $perpage);

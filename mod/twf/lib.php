@@ -3160,7 +3160,7 @@ function twf_make_mail_post($course, $cm, $twf, $discussion, $post, $userfrom, $
  */
 function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false, $reply=false, $link=false,
                           $footer="", $highlight="", $postisread=null, $dummyifcantsee=true, $istracked=null, $return=false) {
-    global $USER, $CFG, $OUTPUT, $DB;
+    global $USER, $CFG, $OUTPUT, $DB, $PAGE;
 
     require_once($CFG->libdir . '/filelib.php');
 
@@ -3266,12 +3266,12 @@ function twf_print_post($post, $discussion, $twf, &$cm, $course, $ownpost=false,
     $postuser = new stdClass;
     $postuserfields = explode(',', user_picture::fields());
 
-    if ($USER->id == $post->userid) {
+    if ($USER->id == $post->userid || has_capability('mod/twf:addinstance', $PAGE->context)) {
         $postuser = username_load_fields_from_object($postuser, $post, null, $postuserfields);
     }
     else {
         // change in course_server.
-        $any_student = $DB->get_record('user', array('id' => '9'));
+        $any_student = $DB->get_record('user', array('username' => 'any_student'));
         $postuser = username_load_fields_from_object($postuser, $any_student, null, $postuserfields);   
     }
     //var_dump($postuser);
