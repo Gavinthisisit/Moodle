@@ -299,7 +299,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $any_student = $DB->get_record('user', array('username' => 'any_student'));
 
             $additionalfields = explode(',', user_picture::fields());
-            if ($USER->id === $summary->authorid || has_capability('mod/teamwork:editsettings', $PAGE->context) {
+            if ($USER->id == $summary->authorid || has_capability('mod/teamwork:editsettings', $PAGE->context)) {
                 $author = username_load_fields_from_object($author, $summary, 'author', $additionalfields);
             }
             else {
