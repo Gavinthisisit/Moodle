@@ -141,6 +141,8 @@ echo $output->render($renderable);
 print_collapsible_region_end();
 
 //display control buttons
-$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader, $can_join_team);
-echo $output->render($renderable);
+if($teamwork->applyover == 0) {
+	$renderable = new teamwork_templet_buttons($teamwork->id, $leading_team, $can_edit_templet, $is_team_leader, $can_join_team);
+	echo $output->render($renderable);
+}
 echo $output->footer();
