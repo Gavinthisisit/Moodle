@@ -388,3 +388,4 @@ $string['needassess'] = '需要评价';
 $string['syncsettings'] = '同步设置';
 $string['selectothers'] = '选择同项目的其它团队';
 $string['selectothers_help'] = '按住Shift键可同时选择多个';
+$string['ing'] = '进行中';

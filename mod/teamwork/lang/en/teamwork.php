@@ -396,3 +396,4 @@ $string['needassess'] = 'Need Assess';
 $string['syncsettings'] = 'Sync Settings';
 $string['selectothers'] = 'Select the other teams for the same project';
 $string['selectothers_help'] = 'Hold down the Shift key to select multiple';
+$string['ing'] = 'In Progress';

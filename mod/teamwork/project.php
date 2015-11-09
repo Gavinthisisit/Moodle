@@ -68,15 +68,19 @@ $output = $PAGE->get_renderer('mod_teamwork');
 /// Output starts here
 $instancerecord = $DB->get_record('teamwork_instance', array('id' => $instanceid));
 $teamrecord = $DB->get_record('teamwork_team', array('id' => $instancerecord->team));
-echo $output->header();
-echo $output->heading(format_string($instancerecord->title.'@'.$teamrecord->name));
-
-$userplan = new teamwork_user_plan($teamwork, $instanceid);
-echo $output->render($userplan,$phase);
 
 if(empty($phase) or $phase > $instancerecord->phase) {
 	$phase = $instancerecord->currentphase;
 }
+
+echo $output->header();
+echo $output->heading(format_string($instancerecord->title.'@'.$teamrecord->name));
+
+$userplan = new teamwork_user_plan($teamwork, $instanceid);
+$userplan->showphase = $phase;
+echo $output->render($userplan);
+
+
 
 // Output team submissions here
 print_collapsible_region_start('', 'workshop-viewlet-teamsubmission', get_string('teamsubmission', 'teamwork'));
@@ -122,7 +126,7 @@ print_collapsible_region_start('', 'workshop-viewlet-teamforum', get_string('tea
 echo $output->box_start('generalbox teamforum');
 
 $associate = $DB->get_record('teamwork_associate_twf', array('course' => $course->id, 'teamwork' => $w));
-$assessed = $DB->get_record('twf_discussions', array('userid' => $USER->id, 'teamwork' => $w, 'instance' => $instanceid, 'phase' => $phase));
+$assessed = $DB->get_record('twf_discussions', array('userid' => $USER->id, 'teamwork' => $w, 'instance' => $instanceid, 'phase' => $instancerecord->currentphase));
 if (!$assessed && (!$ismember || has_capability('mod/teamwork:editsettings', $PAGE->context))) {
 	//Output the button for add discussion
 	echo '<div class="singlebutton forumaddnew">';
