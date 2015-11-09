@@ -807,7 +807,7 @@ class mod_teamwork_renderer extends plugin_renderer_base {
      * @param teamwork_user_plan $plan prepared for the user
      * @return string html code to be displayed
      */
-    protected function render_teamwork_user_plan(teamwork_user_plan $plan) {
+    protected function render_teamwork_user_plan(teamwork_user_plan $plan,$showphase=0) {
         $table = new html_table();
         $table->attributes['class'] = 'userplan';
         $table->head = array();
@@ -818,9 +818,14 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         	$row[$id]->attributes['class'] = 'phasetasks';
         	foreach ($instance->phases as $phasecode => $phase) {
         		$title = html_writer::tag('span', $phase->name);
-        		$table->head[] = $this->output->container($title);
+        		$icon = 'i/marker';
+        		$actions = '';
+            $actions .= $this->output->action_icon("project.php?w=$instance->teamwork&instance=$instance->id&phase=$phase->orderid", new pix_icon($icon, get_string('switchphase', 'teamwork')));
+            $actions = $this->output->container($actions, 'actions');
+        		$table->head[] = $this->output->container($title.$actions);
         		$classes = 'phase' . $phasecode;
-        		if($instance->currentphase == $phasecode) {
+        		$showphase = empty($showphase) ? $instance->currentphase : $showphase;
+        		if($showphase == $phasecode) {
         			$classes .= ' active';
         		}else {
         			$classes .= ' nonactive';
