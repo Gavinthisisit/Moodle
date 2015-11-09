@@ -19,7 +19,6 @@ def countActivitys(cursor,teamid,timestart,timeend):
 	count = cursor.fetchone()
 	print count[0]
 
-
 if __name__ == "__main__":
 	con = MySQLdb.connect(host="localhost",user='root',passwd='',db = 'moodle',charset='utf8')
 	cursor = con.cursor()
