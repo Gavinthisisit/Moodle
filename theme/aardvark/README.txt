@@ -28,6 +28,22 @@
  *  Twitter: http://twitter.com/newburycollege
  *  Website: http://vle.newbury-college.ac.uk
  */
+
+ v2.9.6
+ - Convert fixed path to dynamic path for img.defaultuserpic url. Fixes broken default user image links; when Moodle is mounted in a sub-directory. [Timothy OBrien]
+ 
+ v2.9.5
+ - removed the z-index fix that turned out to be less of a fix and more or a nightmare
+
+ v2.9.4
+ - increased z-index even more because 5000 was too low for the activity chooser
+ 
+ v2.9.3
+ - fixed actionmenu hover colour
+ - increased z-index on PDF Editor
+ 
+ v2.9.2
+ - fixed img max-width issue that affected Gradebook in Chrome
  
  v2.9.1
  - updated a few oranges and yellows to make them less "murky"

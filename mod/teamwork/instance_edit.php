@@ -48,10 +48,9 @@ $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('editingprojectsettings', 'teamwork'));
 
 $mform = null;
-
-
+$submit = optional_param('phasenum', 0, PARAM_INT);
 $data = $DB->get_record('teamwork_instance', array('id' => $instanceid), '*', MUST_EXIST);
-$mform = new teamwork_instance_form($teamworkid,$instanceid,$data->phase);
+$mform = new teamwork_instance_form($teamworkid,$instanceid,$submit==0?$data->phase:0);
 $savedata = new stdClass();
 $savedata->title = $data->title;
 $savedata->summary['text'] = $data->summary;

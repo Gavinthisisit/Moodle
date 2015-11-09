@@ -72,9 +72,9 @@ echo $output->header();
 echo $output->heading(format_string($instancerecord->title.'@'.$teamrecord->name));
 
 $userplan = new teamwork_user_plan($teamwork, $instanceid);
-echo $output->render($userplan);
+echo $output->render($userplan,$phase);
 
-if(empty($phase)) {
+if(empty($phase) or $phase > $instancerecord->phase) {
 	$phase = $instancerecord->currentphase;
 }
 
@@ -131,7 +131,7 @@ if (!$assessed && (!$ismember || has_capability('mod/teamwork:editsettings', $PA
     echo "<input type=\"hidden\" name=\"twf\" value=\"$associate->twf\" />";
     echo "<input type=\"hidden\" name=\"teamwork\" value=\"$w\" />";
     echo "<input type=\"hidden\" name=\"instance\" value=\"$instanceid\" />";
-    echo "<input type=\"hidden\" name=\"phase\" value=\"$phase\" />";
+    echo "<input type=\"hidden\" name=\"phase\" value=\"$instancerecord->currentphase\" />";
     switch ($phaseforum->type) {
         case 'news':
         case 'blog':
