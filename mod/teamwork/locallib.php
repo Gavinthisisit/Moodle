@@ -2899,7 +2899,7 @@ class teamwork_team_info implements renderable {
 				$task->title = get_string('activitycount','teamwork');
 				//$task->link = $teamwork->updatemod_url();
 				$a = array();
-				exec("python sql.py actis ".$teamid." ".$phase_record->timestart.' '.$phase_record->timeend,$a,$b);
+				exec("python sql.py ".$teamid." ".$phase_record->timestart.' '.$phase_record->timeend,$a,$b);
 				$task->details = $a[0];
 				$task->completed = true;
 				$phase->tasks['activity'] = $task;

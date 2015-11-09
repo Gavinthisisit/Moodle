@@ -784,11 +784,12 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 			$icon = 't/delete';
 			$member_record = $DB->get_record('user',array('id'=>$member->userid));
 			$a = array();
-			exec("python sql.py acti ".$member->userid,$a,$b);
+			//exec("python sql.py acti ".$member->userid,$a,$b);
+			$count  = $DB->count_records('logstore_standard_log',array('userid' => $member->userid));
 			$cell_name = html_writer::link($task->link, $member_record->lastname.$member_record->firstname);
         	$cell1->text = $cell_name;
         	$cell2->text = date("Y.m.d H:i:s",$member->time);
-			$cell3->text = $a[0];
+			$cell3->text = $count;
         	$row->cells[] = $cell1;
         	$row->cells[] = $cell2;
 			$row->cells[] = $cell3;
