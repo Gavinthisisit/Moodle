@@ -2878,10 +2878,12 @@ class teamwork_team_info implements renderable {
         //---------------------------------------------------------
         // * SETUP | submission | assessment | evaluation | closed
         //---------------------------------------------------------
-		$phase_count = $DB->count_records('teamwork_templet_phase');
+		$templet = $DB->get_record('teamwork_team',array('id' => $teamid));
+		$templet_id = $templet->templet;
+		$phase_count = $DB->count_records('teamwork_templet_phase',array('templet' => $templet_id));
 		$i = 1;
 		if($phase_count > 0){
-			$phase_records = $DB->get_records('teamwork_templet_phase');
+			$phase_records = $DB->get_records('teamwork_templet_phase',array('templet' => $templet_id));
 			foreach($phase_records as $phase_record){
 				$phase = new stdclass();
 				$phase->title = $phase_record->name;
@@ -3008,7 +3010,7 @@ class teamwork_team_info implements renderable {
         foreach ($this->phases as $phasecode => $phase) {
             $phase->title       = isset($phase->title)      ? $phase->title     : '';
             $phase->tasks       = isset($phase->tasks)      ? $phase->tasks     : array();
-            if ($phasecode == 20) {
+            if ($phasecode == $phase_count*10) {
                 $phase->active = true;
             } else {
                 $phase->active = false;
