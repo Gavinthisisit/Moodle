@@ -3004,7 +3004,6 @@ class teamwork_team_info implements renderable {
 					$this->phases[teamwork::PHASE_CLOSED] = $phase;
 			$i = $i+1;
 		}
-
         // Polish data, set default values if not done explicitly
         foreach ($this->phases as $phasecode => $phase) {
             $phase->title       = isset($phase->title)      ? $phase->title     : '';

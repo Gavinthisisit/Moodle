@@ -451,13 +451,10 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $teamwork = $DB->get_record('teamwork',array('id' => $list->teamwork));
         $output = '';      
         $output .= html_writer::start_tag('div', array('class' => 'content'));
-        //$output .= html_writer::tag('h2', get_string('templetlist', 'teamwork'));
-
         $output .= html_writer::start_tag('div', array('class' => 'instance'));
         if (! empty($list->container)) {
             foreach ($list->container as $id => $instance) {
                 $team_instance = $DB->get_record('teamwork_team',array('id'=>$instance->team));
-
                 $output .= html_writer::start_tag('div', array('class' => 'coursebox clearfix'));
                 $output .= html_writer::start_tag('div', array('class' => 'info'));
                 $output .= html_writer::start_tag('h3', array('class' => 'coursename'));
