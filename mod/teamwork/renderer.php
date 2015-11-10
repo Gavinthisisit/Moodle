@@ -53,23 +53,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
         $row->attributes['class'] = 'phasetasks';
         foreach ($plan->phases as $phasecode => $phase) {
             $title = html_writer::tag('span', $phase->title);
-            $actions = '';
-            foreach ($phase->actions as $action) {
-                switch ($action->type) {
-                case 'switchphase':
-                    $icon = 'i/marker';
-                    if ($phasecode == teamwork::PHASE_ASSESSMENT
-                            and $plan->teamwork->phase == teamwork::PHASE_SUBMISSION
-                            and $plan->teamwork->phaseswitchassessment) {
-                        $icon = 'i/scheduled';
-                    }
-                    $actions .= $this->output->action_icon($action->url, new pix_icon($icon, get_string('switchphase', 'teamwork')));
-                    break;
-                }
-            }
-            if (!empty($actions)) {
-                $actions = $this->output->container($actions, 'actions');
-            }
             $table->head[] = $this->output->container($title . $actions);
             $classes = 'phase' . $phasecode;
             if ($phase->active) {

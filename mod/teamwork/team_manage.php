@@ -73,7 +73,7 @@ if($templetview!=0){
 		
 		echo $output->render($renderable);
 		
-		$teaminfo = new teamwork_team_info($teamwork, $team->id);
+		$teaminfo = new teamwork_team_info($teamwork, $team->id,$w);
 		
 		echo $output->render($teaminfo);
 		
