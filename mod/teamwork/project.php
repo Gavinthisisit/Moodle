@@ -61,7 +61,13 @@ if (!is_null($editmode) && $PAGE->user_allowed_editing()) {
 
 $PAGE->set_title($teamwork->name);
 $PAGE->set_heading($course->fullname);
+$PAGE->set_url(new moodle_url("/mod/teamwork/project.php",array('w' => $w,'instance' => $instanceid)));
 
+if ($perpage and $perpage > 0 and $perpage <= 1000) {
+    require_sesskey();
+    set_user_preference('teamwork_perpage', $perpage);
+    redirect($PAGE->url);
+}
 
 $output = $PAGE->get_renderer('mod_teamwork');
 
