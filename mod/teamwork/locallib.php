@@ -2906,7 +2906,7 @@ class teamwork_team_info implements renderable {
 				$task = new stdclass();
 				$task->title = get_string('commitcount','teamwork');
 				$instance = $DB->get_record('teamwork_instance',array('team' => $teamid));
-				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id));
+				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
 				if ($teamwork->grading_strategy_instance()->form_ready()) {
 					$task->completed = true;
 				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
@@ -2917,7 +2917,7 @@ class teamwork_team_info implements renderable {
 				
 				$task = new stdclass();
 				$task->title =get_string('feedbackcount','teamwork');
-				$task->link = $task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id));
+				$task->link = $task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
 				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
 					$task->completed = true;
 				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
@@ -2928,7 +2928,7 @@ class teamwork_team_info implements renderable {
 				
 				$task = new stdclass();
 				$task->title = get_string('workupload','teamwork');
-				$task->link = $task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id));
+				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
 				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
 					$task->completed = true;
 				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
