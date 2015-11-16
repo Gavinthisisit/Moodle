@@ -15,7 +15,6 @@ def countActivitys(cursor,teamid,timestart,timeend):
 			line = line + " or userid = '"+str(userid[0]) + "'"
 	line = line + ")"
 	sql = sql + line
-	print sql
 	cursor.execute(sql);
 	count = cursor.fetchone()
 	print count[0]

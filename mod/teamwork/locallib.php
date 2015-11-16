@@ -2890,8 +2890,16 @@ class teamwork_team_info implements renderable {
 				$phase->tasks = array();
 				$task = new stdclass();
 				$task->title = get_string('completecount','teamwork');
-				$task->details = '100%';
-				$task->completed = !(trim($teamwork->intro) == '');
+				
+				$filecount = $DB->count_records('teamwork_submissions',array('instance' => $instance_id,'phase' => $i));
+				if($filecount > 0){
+					$task->completed = true;
+					$task->details = "100%";
+				}
+				elseif($filecount == 0){
+					$task->completed = false;
+					$task->details = "0";
+				}
 				$phase->tasks['complete'] = $task;
 				
 				$task = new stdclass();
@@ -2929,11 +2937,12 @@ class teamwork_team_info implements renderable {
 				$task = new stdclass();
 				$task->title = get_string('workupload','teamwork');
 				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
-				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
+				if ($filecount > 0) {
 					$task->completed = true;
-				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
+				} else{
 					$task->completed = false;
 				}
+				$task->details = $filecount;
 				$phase->tasks['workupload'] = $task;
 				
 				$task = new stdclass();
