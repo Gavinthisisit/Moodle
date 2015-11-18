@@ -712,7 +712,16 @@ class teamwork {
 
         return $DB->count_records_sql($sql, $params);
     }
-
+	
+	
+	/*
+		get user's submission
+		by gavin
+		@param int $userid
+	*/
+	
+	
+	
     /**
      * Returns submissions from this teamwork
      *
@@ -743,6 +752,53 @@ class teamwork {
         }
         $sql .= " LEFT JOIN {user} t ON (s.gradeoverby = t.id)
                  WHERE s.example = 0 AND s.phase = $phase AND s.teamworkid = :teamworkid";
+
+        if ('all' === $authorid) {
+            // no additional conditions
+        } elseif (!empty($authorid)) {
+            list($usql, $uparams) = $DB->get_in_or_equal($authorid, SQL_PARAMS_NAMED);
+            $sql .= " AND authorid $usql";
+            $params = array_merge($params, $uparams);
+        } else {
+            // $authorid is empty
+            return array();
+        }
+        list($sort, $sortparams) = users_order_by_sql('u');
+        $sql .= " ORDER BY $sort";
+
+        return $DB->get_records_sql($sql, array_merge($params, $sortparams), $limitfrom, $limitnum);
+    }
+	
+	/**
+     * Returns user all submissions from this teamwork
+     *
+     * Fetches data from {teamwork_submissions} and adds some useful information from other
+     * tables. Does not return textual fields to prevent possible memory lack issues.
+     *
+     * @see self::count_submissions()
+     * @param mixed $authorid int|array|'all' If set to [array of] integer, return submission[s] of the given user[s] only
+     * @param int $groupid If non-zero, return only submissions by authors in the specified group
+     * @param int $limitfrom Return a subset of records, starting at this point (optional)
+     * @param int $limitnum Return a subset containing this many records in total (optional, required if $limitfrom is set)
+     * @return array of records or an empty array
+     */
+    public function get_all_submissions($authorid='all',$groupid=0, $limitfrom=0, $limitnum=0) {
+        global $DB;
+
+        $authorfields      = user_picture::fields('u', null, 'authoridx', 'author');
+        $gradeoverbyfields = user_picture::fields('t', null, 'gradeoverbyx', 'over');
+        $params            = array('teamworkid' => $this->id);
+        $sql = "SELECT s.id, s.teamworkid, s.example, s.authorid, s.timecreated, s.timemodified,
+                       s.title, s.grade, s.gradeover, s.gradeoverby, s.published, s.instance,
+                       $authorfields, $gradeoverbyfields
+                  FROM {teamwork_submissions} s
+                  JOIN {user} u ON (s.authorid = u.id)";
+        if ($groupid) {
+            $sql .= " JOIN {groups_members} gm ON (gm.userid = u.id AND gm.groupid = :groupid)";
+            $params['groupid'] = $groupid;
+        }
+        $sql .= " LEFT JOIN {user} t ON (s.gradeoverby = t.id)
+                 WHERE s.example = 0 AND s.teamworkid = :teamworkid";
 
         if ('all' === $authorid) {
             // no additional conditions
@@ -2856,7 +2912,7 @@ class teamwork_team_info implements renderable {
 
     /** @var int id of the user this plan is for */
     public $teamid;
-    /** @var teamwork */
+    /** @var  int teamwork */
     public $teamwork;
     /** @var array of (stdclass)tasks */
     public $phases = array();
@@ -2869,7 +2925,7 @@ class teamwork_team_info implements renderable {
      * @param teamwork $teamwork instance
      * @param int $userid whom the plan is prepared for
      */
-    public function __construct(teamwork $teamwork, $teamid,$w) {
+    public function __construct($teamwork, $teamid) {
         global $DB;
 
         $this->teamwork = $teamwork;
@@ -2914,29 +2970,21 @@ class teamwork_team_info implements renderable {
 				$task = new stdclass();
 				$task->title = get_string('commitcount','teamwork');
 				$instance = $DB->get_record('teamwork_instance',array('team' => $teamid));
-				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
-				if ($teamwork->grading_strategy_instance()->form_ready()) {
-					$task->completed = true;
-				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
-					$task->completed = false;
-				}
+				$task->link = new moodle_url('project.php',array('w' => $teamwork, 'instance' => $instance->id,'phase' =>$i));
+				$task->completed = true;
 				$phase->tasks['commit'] = $task;
 
 				
 				$task = new stdclass();
 				$task->title =get_string('feedbackcount','teamwork');
-				$task->link = $task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
-				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
-					$task->completed = true;
-				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
-					$task->completed = false;
-				}
+				$task->link = $task->link = new moodle_url('project.php',array('w' => $teamwork, 'instance' => $instance->id,'phase' =>$i));
+				$task->completed = true;
 				$phase->tasks['feedback'] = $task;
 		   
 				
 				$task = new stdclass();
 				$task->title = get_string('workupload','teamwork');
-				$task->link = new moodle_url('project.php',array('w' => $w, 'instance' => $instance->id,'phase' =>$i));
+				$task->link = new moodle_url('project.php',array('w' => $teamwork, 'instance' => $instance->id,'phase' =>$i));
 				if ($filecount > 0) {
 					$task->completed = true;
 				} else{
@@ -2947,11 +2995,7 @@ class teamwork_team_info implements renderable {
 				
 				$task = new stdclass();
 				$task->title = get_string('finalgrade','teamwork');
-				if ($DB->count_records('teamwork_submissions', array('example' => 1, 'teamworkid' => $teamwork->id)) > 0) {
-					$task->completed = true;
-				} elseif ($teamwork->phase > teamwork::PHASE_SETUP) {
-					$task->completed = false;
-				}
+				$task->completed = false;
 				$phase->tasks['finalgrade'] = $task;
 				if($i == 1)
 					$this->phases[teamwork::PHASE_SETUP] = $phase;
@@ -3398,7 +3442,7 @@ abstract class teamwork_submission_base {
      */
     public function is_anonymous() {
         return $this->anonymous;
-    }
+    } 
 }
 
 /**

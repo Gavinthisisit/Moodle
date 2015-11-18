@@ -66,7 +66,6 @@ class mod_teamwork_renderer extends plugin_renderer_base {
             $row->cells[] = $cell;
         }
         $table->data = array($row);
-
         return html_writer::table($table);
     }
 	
@@ -765,7 +764,8 @@ class mod_teamwork_renderer extends plugin_renderer_base {
 			$member_record = $DB->get_record('user',array('id'=>$member->userid));
 			$a = array();
 			$count  = $DB->count_records('logstore_standard_log',array('userid' => $member->userid));
-			$cell_name = html_writer::link($task->link, $member_record->lastname.$member_record->firstname);
+			$url = new moodle_url('student_info.php',array('w' => $teammanage->teamwork,'userid' => $member->userid));
+			$cell_name = html_writer::link($url, $member_record->lastname.$member_record->firstname);
         	$cell1->text = $cell_name;
         	$cell2->text = date("Y.m.d H:i:s",$member->time);
 			$cell3->text = $count;
