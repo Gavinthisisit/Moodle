@@ -61,9 +61,7 @@ if (!empty($add)) {
     navigation_node::override_active_url(course_get_url($course, $section));
 
     list($module, $context, $cw) = can_add_moduleinfo($course, $add, $section);
-
     $cm = null;
-
     $data = new stdClass();
     $data->section          = $section;  // The section number itself - relative!!! (section column in course_sections)
     $data->visible          = $cw->visible;
@@ -78,6 +76,7 @@ if (!empty($add)) {
     $data->add              = $add;
     $data->return           = 0; //must be false if this is an add, go back to course view on cancel
     $data->sr               = $sectionreturn;
+    $data->userid           = $USER-id;
 
     if (plugin_supports('mod', $data->modulename, FEATURE_MOD_INTRO, true)) {
         $draftid_editor = file_get_submitted_draft_itemid('introeditor');
@@ -137,7 +136,6 @@ if (!empty($add)) {
     require_login($course, false, $cm); // needed to setup proper $COURSE
 
     list($cm, $context, $module, $data, $cw) = can_update_moduleinfo($cm);
-
     $data->coursemodule       = $cm->id;
     $data->section            = $cw->section;  // The section number itself - relative!!! (section column in course_sections)
     $data->visible            = $cm->visible; //??  $cw->visible ? $cm->visible : 0; // section hiding overrides
@@ -156,6 +154,7 @@ if (!empty($add)) {
     $data->completionexpected = $cm->completionexpected;
     $data->completionusegrade = is_null($cm->completiongradeitemnumber) ? 0 : 1;
     $data->showdescription    = $cm->showdescription;
+    $data->userid             = $USER-id;
     if (!empty($CFG->enableavailability)) {
         $data->availabilityconditionsjson = $cm->availability;
     }

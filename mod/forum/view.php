@@ -64,6 +64,7 @@
         // fix for MDL-6926
         require_course_login($course, true, $cm);
         $strforums = get_string("modulenameplural", "forum");
+        
         $strforum = get_string("modulename", "forum");
     } else if ($f) {
 
@@ -158,9 +159,9 @@
     }
 
     if ($forum->type == 'qanda' && !has_capability('moodle/course:manageactivities', $context)) {
+        
         echo $OUTPUT->notification(get_string('qandanotify','forum'));
     }
-
     switch ($forum->type) {
         case 'single':
             if (!empty($discussions) && count($discussions) > 1) {

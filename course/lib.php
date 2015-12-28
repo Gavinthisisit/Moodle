@@ -1418,6 +1418,10 @@ function can_edit_in_category($categoryid = 0) {
     return has_any_capability(array('moodle/category:manage', 'moodle/course:create'), $context);
 }
 
+
+
+
+
 /// MODULE FUNCTIONS /////////////////////////////////////////////////////////////////
 
 function add_course_module($mod) {
@@ -1428,6 +1432,17 @@ function add_course_module($mod) {
 
     $cmid = $DB->insert_record("course_modules", $mod);
     rebuild_course_cache($mod->course, true);
+    return $cmid;
+}
+
+/*
+    collaborate forum reward point
+*/
+function set_reward_points($mod) {
+    global $DB;
+    unset($mod->id);
+
+    $cmid = $DB->insert_record("forum_reward_points", $mod);
     return $cmid;
 }
 

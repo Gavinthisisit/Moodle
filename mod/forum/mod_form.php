@@ -53,7 +53,14 @@ class mod_forum_mod_form extends moodleform_mod {
         $mform->addElement('select', 'type', get_string('forumtype', 'forum'), $forumtypes);
         $mform->addHelpButton('type', 'forumtype', 'forum');
         $mform->setDefault('type', 'general');
-
+        
+        $mform->addElement('text', 'rewardpoints', get_string('rewardpoints', 'forum'));
+        $mform->addHelpButton('rewardpoints', 'totalpoint', 'forum');
+        $mform->disabledIf('rewardpoints', 'type', 'eq', 'general');
+        $mform->disabledIf('rewardpoints', 'type', 'eq', 'eachuser');
+        $mform->disabledIf('rewardpoints', 'type', 'eq', 'single');
+        $mform->disabledIf('rewardpoints', 'type', 'eq', 'blog');
+        $mform->disabledIf('rewardpoints', 'type', 'eq', 'qanda');
         // Attachments and word count.
         $mform->addElement('header', 'attachmentswordcounthdr', get_string('attachmentswordcount', 'forum'));
 
@@ -179,7 +186,6 @@ class mod_forum_mod_form extends moodleform_mod {
         plagiarism_get_form_elements_module($mform, $coursecontext, 'mod_forum');
 
 //-------------------------------------------------------------------------------
-
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();

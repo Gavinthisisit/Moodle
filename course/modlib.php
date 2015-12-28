@@ -137,7 +137,17 @@ function add_moduleinfo($moduleinfo, $course, $mform = null) {
             print_error('cannotaddnewmodule', '', course_get_url($course, $moduleinfo->section), $moduleinfo->modulename);
         }
     }
-
+   if($moduleinfo->type == 'collaborate'){
+        $rewardpoint = new Stdclass();
+        $rewardpoint->coursemoduleid       = $moduleinfo->coursemodule;
+        $rewardpoint->instance             = $returnfromfunc;
+        $rewardpoint->courseid             = $course->id;
+        $rewardpoint->point                = $moduleinfo->rewardpoints;
+        $rewardid = set_reward_points($rewardpoint);
+        $DB->set_field('forum_reward_points', 'coursemoduleid', $moduleinfo->coursemodule, array('id'=>$rewardid));
+        $DB->set_field('forum_reward_points', 'instance', $returnfromfunc, array('id'=>$rewardid));
+    }
+    
     $moduleinfo->instance = $returnfromfunc;
 
     $DB->set_field('course_modules', 'instance', $returnfromfunc, array('id'=>$moduleinfo->coursemodule));

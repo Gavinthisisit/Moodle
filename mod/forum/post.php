@@ -31,6 +31,8 @@ $reply   = optional_param('reply', 0, PARAM_INT);
 $forum   = optional_param('forum', 0, PARAM_INT);
 $edit    = optional_param('edit', 0, PARAM_INT);
 $delete  = optional_param('delete', 0, PARAM_INT);
+$pass    = optional_param('pass',0,PARAM_INT);
+$reward  = optional_param('reward',0,PARAM_INT);
 $prune   = optional_param('prune', 0, PARAM_INT);
 $name    = optional_param('name', '', PARAM_CLEAN);
 $confirm = optional_param('confirm', 0, PARAM_INT);
@@ -41,6 +43,8 @@ $PAGE->set_url('/mod/forum/post.php', array(
         'forum' => $forum,
         'edit'  => $edit,
         'delete'=> $delete,
+        'pass'  => $pass,
+        'reward'=> $reward,
         'prune' => $prune,
         'name'  => $name,
         'confirm'=>$confirm,
@@ -259,7 +263,6 @@ if (!empty($forum)) {      // User is starting a new discussion in a forum
     } else {
         $modcontext = context_module::instance($cm->id);
     }
-
     $PAGE->set_cm($cm, $course, $forum);
 
     if (!($forum->type == 'news' && !$post->parent && $discussion->timestart > time())) {
@@ -286,7 +289,6 @@ if (!empty($forum)) {      // User is starting a new discussion in a forum
     unset($SESSION->fromdiscussion);
 
 }else if (!empty($delete)) {  // User is deleting a post
-
     if (! $post = forum_get_post_full($delete)) {
         print_error('invalidpostid', 'forum');
     }
@@ -390,7 +392,6 @@ if (!empty($forum)) {      // User is starting a new discussion in a forum
 
 
     } else { // User just asked to delete something
-
         forum_set_return();
         $PAGE->navbar->add(get_string('delete', 'forum'));
         $PAGE->set_title($course->shortname);
@@ -428,6 +429,162 @@ if (!empty($forum)) {      // User is starting a new discussion in a forum
     die;
 
 
+}else if (!empty($pass)) {  // User is deleting a post
+
+   $post = $DB->get_record('forum_posts',array('id'=>$pass));
+   if (! $post) {
+        print_error('invalidpostid', 'forum');
+    }
+   if (! $discussion = $DB->get_record("forum_discussions", array("id" => $post->discussion))) {
+        print_error('notpartofdiscussion', 'forum');
+    }
+    if (! $forum = $DB->get_record("forum", array("id" => $discussion->forum))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $forum->course)) {
+        print_error('invalidcoursemodule');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $forum->course))) {
+        print_error('invalidcourseid');
+    }
+    
+
+    require_login($course, false, $cm);
+    $modcontext = context_module::instance($cm->id);
+    $parent_post = $DB->get_record('forum_posts',array('id'=>$post->parent));
+    if ( !($parent_post->userid == $USER->id)) {
+        print_error('cannotpasspost', 'forum');
+    }
+    if (!empty($confirm) && confirm_sesskey()) {    // User has confirmed the delete
+        //check user capability to delete post.
+        forum_pass_apply($post,$forum);
+        
+        
+        ///////////////////////////here we need to add some event
+        
+        redirect("discuss.php?d=$discussion->id");    
+    }
+    else{
+        
+        forum_set_return();
+        $PAGE->navbar->add(get_string('pass', 'forum'));
+        $PAGE->set_title($course->shortname);
+        $PAGE->set_heading($course->fullname);
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(format_string($forum->name), 2);
+        echo $OUTPUT->confirm(get_string("acceptanswer", "forum"),
+                     "post.php?pass=$pass&confirm=$pass",
+                     $CFG->wwwroot.'/mod/forum/discuss.php?d='.$post->discussion.'#p'.$post->id);
+        forum_print_post($post, $discussion, $forum, $cm, $course, false, false, false);
+    }
+    echo $OUTPUT->footer();
+    die;
+
+
+}else if (!empty($reward)) {  // User is deleting a post
+   if (! $post = $DB->get_record('forum_posts',array('id'=>$reward))) {
+        print_error('invalidpostid', 'forum');
+    }
+   if (! $discussion = $DB->get_record("forum_discussions", array("id" => $post->discussion))) {
+        print_error('notpartofdiscussion', 'forum');
+    }
+    if (! $forum = $DB->get_record("forum", array("id" => $discussion->forum))) {
+        print_error('invalidforumid', 'forum');
+    }
+    if (!$cm = get_coursemodule_from_instance("forum", $forum->id, $forum->course)) {
+        print_error('invalidcoursemodule');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $forum->course))) {
+        print_error('invalidcourseid');
+    }
+    
+
+    require_login($course, false, $cm);
+    $modcontext = context_module::instance($cm->id);
+    if ( !$parent_post = $DB->get_record('forum_accepte',array('post'=>$post->id))) {
+        print_error('alreadyrewardthisstudent', 'forum');
+    }
+    
+    $rewardforum = new mod_forum_prune_form(null, array('reward' => $reward, 'confirm' => $reward));
+    
+    if ($rewardforum->is_cancelled()) {
+        redirect(forum_go_back_to("discuss.php?d=$post->discussion"));
+    } else if ($fromform = $rewardforum->get_data()) {
+        // User submits the data.
+        $reward_point = $fromform->name;
+        $DB->set_field("forum_accepte", "point", $reward_point, array("post" => $reward));
+        $DB->set_field("forum_accepte", "accepted",1, array("post" => $reward));
+        // Fire events to reflect the split..     here we should add some new event
+        /*$params = array(
+            'context' => $modcontext,
+            'objectid' => $discussion->id,
+            'other' => array(
+                'forumid' => $forum->id,
+            )
+        );
+        $event = \mod_forum\event\discussion_updated::create($params);
+        $event->trigger();
+
+        $params = array(
+            'context' => $modcontext,
+            'objectid' => $newid,
+            'other' => array(
+                'forumid' => $forum->id,
+            )
+        );
+        $event = \mod_forum\event\discussion_created::create($params);
+        $event->trigger();
+
+        $params = array(
+            'context' => $modcontext,
+            'objectid' => $post->id,
+            'other' => array(
+                'discussionid' => $newid,
+                'forumid' => $forum->id,
+                'forumtype' => $forum->type,
+            )
+        );
+        $event = \mod_forum\event\post_updated::create($params);
+        $event->add_record_snapshot('forum_discussions', $discussion);
+        $event->trigger();
+        */
+        $id = $post->discussion;
+        redirect(forum_go_back_to("discuss.php?d=$id"));
+
+    } else {
+        // Display the prune form.
+        $course = $DB->get_record('course', array('id' => $forum->course));
+        $PAGE->navbar->add(format_string($post->subject, true), new moodle_url('/mod/forum/discuss.php', array('d'=>$discussion->id)));
+        $PAGE->navbar->add(get_string("pointreward", "forum"));
+        $PAGE->set_title(format_string($discussion->name).": ".format_string($post->subject));
+        $PAGE->set_heading($course->fullname);
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(format_string($forum->name), 2);
+        
+        $str_print = new Stdclass();
+        $record = $DB->get_record('forum_accepte',array('post'=>$post->parent));
+        $str_print->totalpoint = $record->point;
+        $accepted_records = $DB->get_records('forum_accepte',array('discussion'=>$post->discussion,'accepted'=>1));
+        $i = 0;
+        $spent = 0;
+        foreach ($accepted_records as $re){
+            $spent = $spent + $re->point;
+            $i = $i + 1;
+        }
+        
+        $str_print->spent = $spent;
+        $all = $DB->count_records('forum_accepte',array('discussion'=>$post->discussion));
+        $str_print->left = $all-$i-1;
+        echo $OUTPUT->heading(get_string('rewarding', 'forum',$str_print), 3);
+
+        $rewardforum->display();
+
+        forum_print_post($post, $discussion, $forum, $cm, $course, false, false, false);
+    }
+    echo $OUTPUT->footer();
+    die;
+
+
 } else if (!empty($prune)) {  // Pruning
 
     if (!$post = forum_get_post_full($prune)) {
@@ -451,7 +608,7 @@ if (!empty($forum)) {      // User is starting a new discussion in a forum
         $modcontext = context_module::instance($cm->id);
     }
     if (!has_capability('mod/forum:splitdiscussions', $modcontext)) {
-        print_error('cannotsplit', 'forum');
+        print_error('cannotsplits', 'forum');
     }
 
     $PAGE->set_cm($cm);
@@ -574,6 +731,7 @@ if (!isset($forum->maxattachments)) {  // TODO - delete this once we add a field
 }
 
 $thresholdwarning = forum_check_throttling($forum, $cm);
+
 $mform_post = new mod_forum_post_form('post.php', array('course' => $course,
                                                         'cm' => $cm,
                                                         'coursecontext' => $coursecontext,
@@ -603,7 +761,6 @@ if ($USER->id != $post->userid) {   // Not the original author, so add a message
     }
     unset($data);
 }
-
 $formheading = '';
 if (!empty($parent)) {
     $heading = get_string("yourreply", "forum");
@@ -861,14 +1018,14 @@ if ($mform_post->is_cancelled()) {
 
         $discussion = $fromform;
         $discussion->name = $fromform->subject;
-
+        
         $newstopic = false;
         if ($forum->type == 'news' && !$fromform->parent) {
             $newstopic = true;
         }
         $discussion->timestart = $fromform->timestart;
         $discussion->timeend = $fromform->timeend;
-
+        $discussion->totalscore = $fromform->rewardpoint;
         $allowedgroups = array();
         $groupstopostto = array();
 
@@ -1061,6 +1218,7 @@ if (!empty($parent)) {
 if (!empty($formheading)) {
     echo $OUTPUT->heading($formheading, 2, array('class' => 'accesshide'));
 }
+echo $forum->type;
 $mform_post->display();
 
 echo $OUTPUT->footer();

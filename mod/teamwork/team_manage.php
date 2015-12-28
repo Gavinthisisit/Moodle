@@ -118,7 +118,7 @@ if($templetview!=0){
 	$renderable = new teamwork_team_manage($w, $teamid);
 	echo $output->render($renderable);
 	print_collapsible_region_end();
-	
+
 	echo $output->footer();
 }
 

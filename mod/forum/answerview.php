@@ -234,7 +234,7 @@ $renderer = $PAGE->get_renderer('mod_forum');
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(format_string($forum->name), 2);
-echo $OUTPUT->heading(get_string('Question','forum').format_string($discussion->name), 3, 'discussionname');
+echo $OUTPUT->heading(format_string($discussion->name), 3, 'discussionname');
 
 // is_guest should be used here as this also checks whether the user is a guest in the current course.
 // Guests and visitors cannot subscribe - only enrolled users.
@@ -273,6 +273,7 @@ echo $neighbourlinks;
 
 /// Print the controls across the top
 echo '<div class="discussioncontrols clearfix">';
+
 if (!empty($CFG->enableportfolios) && has_capability('mod/forum:exportdiscussion', $modcontext)) {
     require_once($CFG->libdir.'/portfoliolib.php');
     $button = new portfolio_add_button();
@@ -290,11 +291,9 @@ if (!empty($CFG->enableportfolios) && has_capability('mod/forum:exportdiscussion
 }
 
 // groups selector not needed here
-if($forum->type != 'collaborate'){
-	echo '<div class="discussioncontrol displaymode">';
-	forum_print_mode_form($discussion->id, $displaymode);
-	echo "</div>";
-}
+echo '<div class="discussioncontrol displaymode">';
+forum_print_mode_form($discussion->id, $displaymode);
+echo "</div>";
 
 if ($forum->type != 'single'
             && has_capability('mod/forum:movediscussions', $modcontext)) {

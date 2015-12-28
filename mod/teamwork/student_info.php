@@ -98,17 +98,29 @@ echo $output->render($pagingbar);
 foreach ($submissions as $submission) {
     echo $output->render($teamwork->prepare_submission_summary($submission, $shownames));
 }
-//echo $output->render($pagingbar);
-//echo $output->perpage_selector($perpage);
-//echo $output->single_button("submission.php?teamwork=$w&instance=$instancerecord->id", get_string('createsubmission', 'teamwork'), 'get');
+echo $output->render($pagingbar);
+echo $output->perpage_selector($perpage);
 echo $output->box_end();
 print_collapsible_region_end();
 
 
 print_collapsible_region_start('', 'workshop-viewlet-owncommmit', '用户给出的评价');//get_string('studentsubmission', 'teamwork'));
 echo $output->box_start('generalbox ownsubmission');
-
-
+/*
+$associate = $DB->get_record('teamwork_associate_twf', array('course' => $course->id, 'teamwork' => $w));
+$countsubmissions = count($DB->get_records('twf_discussions', array('twf' => $associate->twf, 'teamwork' => $w, 'instance' => $instanceid, 'phase' => $phase)));
+$perpage = get_user_preferences('teamwork_perpage', 10);
+$pagingbar = new paging_bar($countsubmissions, $page, $perpage, $PAGE->url, 'page');
+$discussions = $teamwork->get_phase_discussions($associate->twf, $instanceid, $phase, $page * $perpage, $perpage);
+$shownames = has_capability('mod/teamwork:viewauthornames', $teamwork->context);
+echo $output->render($pagingbar);
+foreach ($discussions as $discussion) {
+	$discussion->authorid = $discussion->authoridx;
+    echo $output->render($teamwork->prepare_discussion_summary($discussion, $shownames));
+}
+echo $output->render($pagingbar);
+echo $output->perpage_selector($perpage);
+*/
 echo $output->box_end();
 print_collapsible_region_end();
 

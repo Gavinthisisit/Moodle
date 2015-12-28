@@ -151,12 +151,25 @@ class mod_forum_post_form extends moodleform {
             $mform->addElement('date_selector', 'timeend', get_string('displayend', 'forum'), array('optional'=>true));
             $mform->addHelpButton('timeend', 'displayend', 'forum');
 
-        } else {
+        } else  if(!$post->parent && $forum->type == 'collaborate'){
+            $mform->addElement('header', 'displayperiod', get_string('displayperiod', 'forum'));
+            $mform->addElement('date_time_selector', 'timestart', get_string('displaystart', 'forum'), array('optional'=>true));
+            $mform->addHelpButton('timestart', 'displaystart', 'forum');
+
+            $mform->addElement('date_time_selector', 'timeend', get_string('displayend', 'forum'), array('optional'=>true));
+            $mform->addHelpButton('timeend', 'displayend', 'forum');
+        }else{
             $mform->addElement('hidden', 'timestart');
             $mform->setType('timestart', PARAM_INT);
             $mform->addElement('hidden', 'timeend');
             $mform->setType('timeend', PARAM_INT);
             $mform->setConstants(array('timestart'=> 0, 'timeend'=>0));
+        }
+        if(!$post->parent && $forum->type == 'collaborate'){
+            $mform->addElement('header', 'reward', get_string('reward', 'forum'));
+            $mform->addElement('text', 'rewardpoint', get_string('rewardpoint', 'grades'));
+            $mform->addRule('rewardpoint', get_string('required'), 'required', null, 'client');
+            $mform->setType('rewardpoint', PARAM_RAW);
         }
 
         if ($groupmode = groups_get_activity_groupmode($cm, $course)) {

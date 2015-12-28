@@ -3159,8 +3159,8 @@ function forum_make_mail_post($course, $cm, $forum, $discussion, $post, $userfro
  * @return void
  */
 function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=false, $reply=false, $link=false,
-                          $footer="", $highlight="", $postisread=null, $dummyifcantsee=true, $istracked=null, $return=false) {
-    global $USER, $CFG, $OUTPUT;
+                          $footer="", $highlight="", $postisread=null, $dummyifcantsee=true, $istracked=null, $return=false,$parentid=0) {
+    global $USER, $CFG, $OUTPUT, $DB;
 
     require_once($CFG->libdir . '/filelib.php');
 
@@ -3168,7 +3168,7 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     static $str;
 
     $modcontext = context_module::instance($cm->id);
-
+    
     $post->course = $course->id;
     $post->forum  = $forum->id;
     $post->message = file_rewrite_pluginfile_urls($post->message, 'pluginfile.php', $modcontext->id, 'mod_forum', 'post', $post->id);
@@ -3206,8 +3206,7 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     if ($istracked && is_null($postisread)) {
         $postisread = forum_tp_is_post_read($USER->id, $post);
     }
-
-    if (!forum_user_can_see_post($forum, $discussion, $post, NULL, $cm)) {
+    if (!forum_user_can_see_post($forum, $discussion, $post, NULL, $cm)) {  
         $output = '';
         if (!$dummyifcantsee) {
             if ($return) {
@@ -3257,6 +3256,8 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
         $str->displaymode     = get_user_preferences('forum_displaymode', $CFG->forum_displaymode);
         $str->markread     = get_string('markread', 'forum');
         $str->markunread   = get_string('markunread', 'forum');
+        $str->pass         = get_string('pass','forum');
+        $str->pointreward       = get_string('pointreward','forum');
     }
 
     $discussionlink = new moodle_url('/mod/forum/discuss.php', array('d'=>$post->discussion));
@@ -3266,8 +3267,17 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     $postuserfields = explode(',', user_picture::fields());
     $postuser = username_load_fields_from_object($postuser, $post, null, $postuserfields);
     $postuser->id = $post->userid;
-    $postuser->fullname    = fullname($postuser, $cm->cache->caps['moodle/site:viewfullnames']);
-    $postuser->profilelink = new moodle_url('/user/view.php', array('id'=>$post->userid, 'course'=>$course->id));
+
+    if($USER->id == $post->userid || has_capability('mod/forum:editanypost', $modcontext) || ($forum->type != 'collaborate')){
+        $username = fullname($postuser, $cm->cache->caps['moodle/site:viewfullnames']);
+        $postuser->fullname    = $username;
+        $postuser->profilelink = new moodle_url('/user/view.php', array('id'=>$post->userid, 'course'=>$course->id));
+    }
+    else{
+        $username = get_string('someone','forum');
+        $postuser->fullname    = $username;
+    }
+    
 
     // Prepare the groups the posting user belongs to
     if (isset($cm->cache->usersgroups)) {
@@ -3324,7 +3334,7 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     if (!$post->parent && $forum->type == 'news' && $discussion->timestart > time()) {
         $age = 0;
     }
-
+    
     if ($forum->type == 'single' and $discussion->firstpost == $post->id) {
         if (has_capability('moodle/course:manageactivities', $modcontext)) {
             // The first post in single simple is the forum description.
@@ -3343,10 +3353,28 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     } else if (($ownpost && $age < $CFG->maxeditingtime && $cm->cache->caps['mod/forum:deleteownpost']) || $cm->cache->caps['mod/forum:deleteanypost']) {
         $commands[] = array('url'=>new moodle_url('/mod/forum/post.php', array('delete'=>$post->id)), 'text'=>$str->delete);
     }
-
-    if ($reply) {
-        $commands[] = array('url'=>new moodle_url('/mod/forum/post.php#mformforum', array('reply'=>$post->id)), 'text'=>$str->reply);
+    $reply_accept = 0;
+    $questionpost = $DB->get_record('forum_accepte',array('post'=>$parentid));
+    $questionuser = $questionpost->userid;
+    if(($questionuser == $USER->id) && ($post->userid != $USER->id)){
+        $count_accept = $DB->count_records('forum_accepte',array('forum'=>$forum->id,'discussion'=>$discussion->id,'userid'=>$post->userid));
+        if($count_accept == 0 && ($post->parent == $parentid)){
+            $commands[] = array('url'=>new moodle_url('/mod/forum/post.php',array('pass'=>$post->id)),'text'=>$str->pass);
+            $reply_accept = 1;
+        }
+        else if(!$accepted = $DB->get_record('forum_accepte',array('post'=>$post->id,'accepted'=>1)))
+            $commands[] = array('url'=>new moodle_url('/mod/forum/post.php#mformforum', array('reward'=>$post->id)), 'text'=>$str->pointreward);
     }
+    if ($reply && !$reply_accept) {
+        if($reply == 1){
+            $commands[] = array('url'=>new moodle_url('/mod/forum/post.php#mformforum', array('reply'=>$post->id)), 'text'=>$str->reply);
+        }
+        else
+            $commands[] = array('url'=>new moodle_url('/mod/forum/post.php#mformforum', array('reply'=>$post->id)), 'text'=>get_string('apply','forum'));
+    }
+    
+    
+    
 
     if ($CFG->enableportfolios && ($cm->cache->caps['mod/forum:exportpost'] || ($ownpost && $cm->cache->caps['mod/forum:exportownpost']))) {
         $p = array('postid' => $post->id);
@@ -3415,13 +3443,26 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     $output .= html_writer::tag('div', $postsubject, array('class'=>'subject',
                                                            'role' => 'heading',
                                                            'aria-level' => '2'));
-
     $by = new stdClass();
     $by->name = html_writer::link($postuser->profilelink, $postuser->fullname);
     $by->date = userdate($post->modified);
-    $output .= html_writer::tag('div', get_string('bynameondate', 'forum', $by), array('class'=>'author',
+    
+    if($forum->type == 'collaborate' and $parentid == $post->parent && $parentid){
+        $reward_record = $DB->get_record('forum_accepte',array('post'=>$post->id));
+        if(!empty($reward_record->point))
+            $by->point = $reward_record->point;
+        else
+            $by->point = 0;
+        $output .= html_writer::tag('div', get_string('bynameondateandpoint', 'forum', $by), array('class'=>'author',
                                                                                        'role' => 'heading',
                                                                                        'aria-level' => '2'));
+    }
+    else{
+        $output .= html_writer::tag('div', get_string('bynameondate', 'forum', $by), array('class'=>'author',
+                                                                                       'role' => 'heading',
+                                                                                       'aria-level' => '2'));
+    }
+    
 
     $output .= html_writer::end_tag('div'); //topic
     $output .= html_writer::end_tag('div'); //row
@@ -3765,10 +3806,16 @@ function forum_print_discussion_header(&$post, $forum, $group=-1, $datestring=""
     echo "</td>\n";
 
     // User name
-    $fullname = fullname($postuser, has_capability('moodle/site:viewfullnames', $modcontext));
-    echo '<td class="author">';
-    echo '<a href="'.$CFG->wwwroot.'/user/view.php?id='.$post->userid.'&amp;course='.$forum->course.'">'.$fullname.'</a>';
-    echo "</td>\n";
+    if($forum->type == 'collaborate' && ($postuser->id != $USER->id) && !has_capability('mod/forum:deleteanypost', $modcontext)){
+        $fullname = get_string('someone','forum');
+        echo '<td class="author">'.$fullname."</td>\n";
+    }
+    else{
+        $fullname = fullname($postuser, has_capability('moodle/site:viewfullnames', $modcontext));
+        echo '<td class="author">';
+        echo '<a href="'.$CFG->wwwroot.'/user/view.php?id='.$post->userid.'&amp;course='.$forum->course.'">'.$fullname.'</a>';
+        echo "</td>\n";
+    }
 
     // Group picture
     if ($group !== -1) {  // Groups are active - group is a group data object or NULL
@@ -3820,6 +3867,12 @@ function forum_print_discussion_header(&$post, $forum, $group=-1, $datestring=""
             }
             echo "</td>\n";
         }
+    }
+    
+    if($forum->type == 'collaborate'){
+        global $DB;
+        $accept_record = $DB->get_record('forum_accepte',array('post'=>$post->id));
+        echo '<td class="rewardpoint">'.$accept_record->point."</td>\n";
     }
 
     echo '<td class="lastpost">';
@@ -4521,7 +4574,6 @@ function forum_add_discussion($discussion, $mform=null, $unused=null, $userid=nu
     $post->forum         = $forum->id;     // speedup
     $post->course        = $forum->course; // speedup
     $post->mailnow       = $discussion->mailnow;
-
     $post->id = $DB->insert_record("forum_posts", $post);
 
     // TODO: Fix the calling code so that there always is a $cm when this function is called
@@ -4544,7 +4596,20 @@ function forum_add_discussion($discussion, $mform=null, $unused=null, $userid=nu
 
     // Finally, set the pointer on the post.
     $DB->set_field("forum_posts", "discussion", $post->discussion, array("id"=>$post->id));
-
+    if($forum->type == 'collaborate' && !empty($discussion->rewardpoint)){
+        $accept = new stdClass();
+        $accept->forum      = $forum->id;
+        $accept->discussion = $post->discussion;
+        $accept->post       = $post->id;
+        $accept->userid     = $userid;
+        $accept->asked      = 1;
+        $accept->accepted   = 0;
+        $accept->point      = $discussion->rewardpoint;
+        
+        $DB->insert_record("forum_accepte", $accept);
+    }
+    
+    
     if (!empty($cm->id)) {
         forum_add_attachment($post, $forum, $cm, $mform, $unused);
     }
@@ -4610,6 +4675,27 @@ function forum_delete_discussion($discussion, $fulldelete, $course, $cm, $forum)
     return $result;
 }
 
+
+/**
+   accpte the question answer apply
+    
+**/
+function forum_pass_apply($post,$forum){
+    global $DB;
+/*    $post = $DB->get_record('forum_posts',array('id'=>$pass));
+    $discussion = $DB->get_record("forum_discussions", array("id" => $post->discussion));
+    $forum = $DB->get_record("forum", array("id" => $discussion->forum))*/
+    
+    $accept = new Stdclass();
+    $accept->forum          = $forum->id;
+    $accept->discussion     = $post->discussion;
+    $accept->post           = $post->id;
+    $accept->userid         = $post->userid;
+    $accept->asked          = 0;
+    $accept->accepted       = 0;
+    $accept->point          = 0;
+    $DB->insert_record('forum_accepte',$accept);
+}
 
 /**
  * Deletes a single forum post.
@@ -5058,12 +5144,13 @@ function forum_user_can_post($forum, $discussion, $user=NULL, $cm=NULL, $course=
     if (!is_viewing($context, $user->id) and !is_enrolled($context, $user->id, '', true)) {
         return false;
     }
-
+    
     if ($forum->type == 'news') {
         $capname = 'mod/forum:replynews';
     } else {
         $capname = 'mod/forum:replypost';
     }
+    
 
     if (!has_capability($capname, $context, $user->id)) {
         return false;
@@ -5374,6 +5461,315 @@ function forum_print_latest_discussions($course, $forum, $maxdiscussions = -1, $
             case 'qanda':
                 $buttonadd = get_string('addanewquestion', 'forum');
                 break;
+            case 'collaborate':
+                $buttonadd = get_string('askanewquestion', 'forum');
+                break;
+            default:
+                $buttonadd = get_string('addanewdiscussion', 'forum');
+                break;
+        }
+        echo '<input type="submit" value="'.$buttonadd.'" />';
+        echo '</div>';
+        echo '</form>';
+        echo "</div>\n";
+
+    } else if (isguestuser() or !isloggedin() or $forum->type == 'news' or
+        $forum->type == 'qanda' and !has_capability('mod/forum:addquestion', $context) or
+        $forum->type != 'qanda' and !has_capability('mod/forum:startdiscussion', $context)) {
+        // no button and no info
+
+    } else if ($groupmode and !has_capability('moodle/site:accessallgroups', $context)) {
+        // inform users why they can not post new discussion
+        if (!$currentgroup) {
+            echo $OUTPUT->notification(get_string('cannotadddiscussionall', 'forum'));
+        } else if (!groups_is_member($currentgroup)) {
+            echo $OUTPUT->notification(get_string('cannotadddiscussion', 'forum'));
+        }
+    }
+
+// Get all the recent discussions we're allowed to see
+
+    $getuserlastmodified = ($displayformat == 'header');
+
+    if (! $discussions = forum_get_discussions($cm, $sort, $fullpost, null, $maxdiscussions, $getuserlastmodified, $page, $perpage) ) {
+        echo '<div class="forumnodiscuss">';
+        if ($forum->type == 'news') {
+            echo '('.get_string('nonews', 'forum').')';
+        } else if ($forum->type == 'qanda') {
+            echo '('.get_string('noquestions','forum').')';
+        } else {
+            echo '('.get_string('nodiscussions', 'forum').')';
+        }
+        echo "</div>\n";
+        return;
+    }
+
+// If we want paging
+    if ($page != -1) {
+        ///Get the number of discussions found
+        $numdiscussions = forum_get_discussions_count($cm);
+
+        ///Show the paging bar
+        echo $OUTPUT->paging_bar($numdiscussions, $page, $perpage, "view.php?f=$forum->id");
+        if ($numdiscussions > 1000) {
+            // saves some memory on sites with very large forums
+            $replies = forum_count_discussion_replies($forum->id, $sort, $maxdiscussions, $page, $perpage);
+        } else {
+            $replies = forum_count_discussion_replies($forum->id);
+        }
+
+    } else {
+        $replies = forum_count_discussion_replies($forum->id);
+
+        if ($maxdiscussions > 0 and $maxdiscussions <= count($discussions)) {
+            $olddiscussionlink = true;
+        }
+    }
+
+    $canviewparticipants = has_capability('moodle/course:viewparticipants',$context);
+
+    $strdatestring = get_string('strftimerecentfull');
+
+    // Check if the forum is tracked.
+    if ($cantrack = forum_tp_can_track_forums($forum)) {
+        $forumtracked = forum_tp_is_tracked($forum);
+    } else {
+        $forumtracked = false;
+    }
+
+    if ($forumtracked) {
+        $unreads = forum_get_discussions_unread($cm);
+    } else {
+        $unreads = array();
+    }
+
+    if ($displayformat == 'header') {
+        echo '<table cellspacing="0" class="forumheaderlist">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th class="header topic" scope="col">'.get_string('discussion', 'forum').'</th>';
+        echo '<th class="header author" colspan="2" scope="col">'.get_string('startedby', 'forum').'</th>';
+        if ($groupmode > 0) {
+            echo '<th class="header group" scope="col">'.get_string('group').'</th>';
+        }
+        if (has_capability('mod/forum:viewdiscussion', $context)) {
+            echo '<th class="header replies" scope="col">'.get_string('replies', 'forum').'</th>';
+            // If the forum can be tracked, display the unread column.
+            if ($cantrack) {
+                echo '<th class="header replies" scope="col">'.get_string('unread', 'forum');
+                if ($forumtracked) {
+                    echo '<a title="'.get_string('markallread', 'forum').
+                         '" href="'.$CFG->wwwroot.'/mod/forum/markposts.php?f='.
+                         $forum->id.'&amp;mark=read&amp;returnpage=view.php">'.
+                         '<img src="'.$OUTPUT->pix_url('t/markasread') . '" class="iconsmall" alt="'.get_string('markallread', 'forum').'" /></a>';
+                }
+                echo '</th>';
+            }
+        }
+        if($forum->type == 'collaborate'){
+            echo '<th class="header author" scope="col">'.get_string('rewardpoint', 'forum').'</th>';
+        }
+        echo '<th class="header lastpost" scope="col">'.get_string('lastpost', 'forum').'</th>';
+        if ((!is_guest($context, $USER) && isloggedin()) && has_capability('mod/forum:viewdiscussion', $context)) {
+            if (\mod_forum\subscriptions::is_subscribable($forum)) {
+                echo '<th class="header discussionsubscription" scope="col">';
+                echo forum_get_discussion_subscription_icon_preloaders();
+                echo '</th>';
+            }
+        }
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+    }
+
+    foreach ($discussions as $discussion) {
+        if ($forum->type == 'qanda' && !has_capability('mod/forum:viewqandawithoutposting', $context) &&
+            !forum_user_has_posted($forum->id, $discussion->discussion, $USER->id)) {
+            $canviewparticipants = false;
+        }
+
+        if (!empty($replies[$discussion->discussion])) {
+            $discussion->replies = $replies[$discussion->discussion]->replies;
+            $discussion->lastpostid = $replies[$discussion->discussion]->lastpostid;
+        } else {
+            $discussion->replies = 0;
+        }
+
+        // SPECIAL CASE: The front page can display a news item post to non-logged in users.
+        // All posts are read in this case.
+        if (!$forumtracked) {
+            $discussion->unread = '-';
+        } else if (empty($USER)) {
+            $discussion->unread = 0;
+        } else {
+            if (empty($unreads[$discussion->discussion])) {
+                $discussion->unread = 0;
+            } else {
+                $discussion->unread = $unreads[$discussion->discussion];
+            }
+        }
+
+        if (isloggedin()) {
+            $ownpost = ($discussion->userid == $USER->id);
+        } else {
+            $ownpost=false;
+        }
+        // Use discussion name instead of subject of first post
+        $discussion->subject = $discussion->name;
+
+        switch ($displayformat) {
+            case 'header':
+                if ($groupmode > 0) {
+                    if (isset($groups[$discussion->groupid])) {
+                        $group = $groups[$discussion->groupid];
+                    } else {
+                        $group = $groups[$discussion->groupid] = groups_get_group($discussion->groupid);
+                    }
+                } else {
+                    $group = -1;
+                }
+                forum_print_discussion_header($discussion, $forum, $group, $strdatestring, $cantrack, $forumtracked,
+                    $canviewparticipants, $context);
+            break;
+            default:
+                $link = false;
+
+                if ($discussion->replies) {
+                    $link = true;
+                } else {
+                    $modcontext = context_module::instance($cm->id);
+                    $link = forum_user_can_see_discussion($forum, $discussion, $modcontext, $USER);
+                }
+
+                $discussion->forum = $forum->id;
+
+                forum_print_post($discussion, $discussion, $forum, $cm, $course, $ownpost, 0, $link, false,
+                        '', null, true, $forumtracked);
+            break;
+        }
+    }
+
+    if ($displayformat == "header") {
+        echo '</tbody>';
+        echo '</table>';
+    }
+
+    if ($olddiscussionlink) {
+        if ($forum->type == 'news') {
+            $strolder = get_string('oldertopics', 'forum');
+        } else {
+            $strolder = get_string('olderdiscussions', 'forum');
+        }
+        echo '<div class="forumolddiscuss">';
+        echo '<a href="'.$CFG->wwwroot.'/mod/forum/view.php?f='.$forum->id.'&amp;showall=1">';
+        echo $strolder.'</a> ...</div>';
+    }
+
+    if ($page != -1) { ///Show the paging bar
+        echo $OUTPUT->paging_bar($numdiscussions, $page, $perpage, "view.php?f=$forum->id");
+    }
+}
+
+
+/**
+ * Prints the discussion view screen for a collaborate forum.
+ *
+ * @global object
+ * @global object
+ * @param object $course The current course object.
+ * @param object $forum Forum to be printed.
+ * @param int $maxdiscussions .
+ * @param string $displayformat The display format to use (optional).
+ * @param string $sort Sort arguments for database query (optional).
+ * @param int $groupmode Group mode of the forum (optional).
+ * @param void $unused (originally current group)
+ * @param int $page Page mode, page to display (optional).
+ * @param int $perpage The maximum number of discussions per page(optional)
+ * @param boolean $subscriptionstatus Whether the user is currently subscribed to the discussion in some fashion.
+ *
+ */
+function forum_print_latest_discussions_collaborate($course, $forum, $maxdiscussions = -1, $displayformat = 'plain', $sort = '',
+                                        $currentgroup = -1, $groupmode = -1, $page = -1, $perpage = 100, $cm = null) {
+    global $CFG, $USER, $OUTPUT;
+
+    if (!$cm) {
+        if (!$cm = get_coursemodule_from_instance('forum', $forum->id, $forum->course)) {
+            print_error('invalidcoursemodule');
+        }
+    }
+    $context = context_module::instance($cm->id);
+
+    if (empty($sort)) {
+        $sort = "d.timemodified DESC";
+    }
+
+    $olddiscussionlink = false;
+
+ // Sort out some defaults
+    if ($perpage <= 0) {
+        $perpage = 0;
+        $page    = -1;
+    }
+
+    if ($maxdiscussions == 0) {
+        // all discussions - backwards compatibility
+        $page    = -1;
+        $perpage = 0;
+        if ($displayformat == 'plain') {
+            $displayformat = 'header';  // Abbreviate display by default
+        }
+
+    } else if ($maxdiscussions > 0) {
+        $page    = -1;
+        $perpage = $maxdiscussions;
+    }
+
+    $fullpost = false;
+    if ($displayformat == 'plain') {
+        $fullpost = true;
+    }
+
+
+// Decide if current user is allowed to see ALL the current discussions or not
+
+// First check the group stuff
+    if ($currentgroup == -1 or $groupmode == -1) {
+        $groupmode    = groups_get_activity_groupmode($cm, $course);
+        $currentgroup = groups_get_activity_group($cm);
+    }
+
+    $groups = array(); //cache
+
+// If the user can post discussions, then this is a good place to put the
+// button for it. We do not show the button if we are showing site news
+// and the current user is a guest.
+
+    $canstart = forum_user_can_post_discussion($forum, $currentgroup, $groupmode, $cm, $context);
+    if (!$canstart and $forum->type !== 'news') {
+        if (isguestuser() or !isloggedin()) {
+            $canstart = true;
+        }
+        if (!is_enrolled($context) and !is_viewing($context)) {
+            // allow guests and not-logged-in to see the button - they are prompted to log in after clicking the link
+            // normal users with temporary guest access see this button too, they are asked to enrol instead
+            // do not show the button to users with suspended enrolments here
+            $canstart = enrol_selfenrol_available($course->id);
+        }
+    }
+
+    if ($canstart) {
+        echo '<div class="singlebutton forumaddnew">';
+        echo "<form id=\"newdiscussionform\" method=\"get\" action=\"$CFG->wwwroot/mod/forum/post.php\">";
+        echo '<div>';
+        echo "<input type=\"hidden\" name=\"forum\" value=\"$forum->id\" />";
+        switch ($forum->type) {
+            case 'news':
+            case 'blog':
+                $buttonadd = get_string('addanewtopic', 'forum');
+                break;
+            case 'qanda':
+                $buttonadd = get_string('addanewquestion', 'forum');
+                break;
             default:
                 $buttonadd = get_string('addanewdiscussion', 'forum');
                 break;
@@ -5596,7 +5992,7 @@ function forum_print_latest_discussions($course, $forum, $maxdiscussions = -1, $
  * @param bool $canrate
  */
 function forum_print_discussion($course, $cm, $forum, $discussion, $post, $mode, $canreply=NULL, $canrate=false) {
-    global $USER, $CFG;
+    global $USER, $CFG,$DB;
 
     require_once($CFG->dirroot.'/rating/lib.php');
 
@@ -5671,10 +6067,22 @@ function forum_print_discussion($course, $cm, $forum, $discussion, $post, $mode,
     $post->subject = format_string($post->subject);
 
     $postread = !empty($post->postread);
-
-    forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
-                         '', '', $postread, true, $forumtracked);
-
+    
+    if($forum->type == 'collaborate'){
+        $dis = $DB->get_record('forum_discussions',array('firstpost'=>$post->id));
+        if((time()-$dis->timemodified) > (($dis->timeend)-($dis->timestart)))
+            $apply =  false;
+        else
+            $apply = 2;
+        print_collapsible_region_start('', 'forum-questionview', get_string('questionview','forum'));
+        forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $apply, false,
+                             '', '', $postread, true, $forumtracked);
+        print_collapsible_region_end();
+    }
+    else{
+        forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
+                             '', '', $postread, true, $forumtracked);
+    }
     switch ($mode) {
         case FORUM_MODE_FLATOLDEST :
         case FORUM_MODE_FLATNEWEST :
@@ -5687,7 +6095,7 @@ function forum_print_discussion($course, $cm, $forum, $discussion, $post, $mode,
             break;
 
         case FORUM_MODE_NESTED :
-            forum_print_posts_nested($course, $cm, $forum, $discussion, $post, $reply, $forumtracked, $posts);
+            forum_print_posts_nested($course, $cm, $forum, $discussion, $post, $reply, $forumtracked, $posts,$post->id);
             break;
     }
 }
@@ -5709,7 +6117,7 @@ function forum_print_discussion($course, $cm, $forum, $discussion, $post, $mode,
  * @return void
  */
 function forum_print_posts_flat($course, &$cm, $forum, $discussion, $post, $mode, $reply, $forumtracked, $posts) {
-    global $USER, $CFG;
+    global $USER, $CFG,$DB;
 
     $link  = false;
 
@@ -5718,7 +6126,7 @@ function forum_print_posts_flat($course, &$cm, $forum, $discussion, $post, $mode
     } else {
         $sort = "ORDER BY created ASC";
     }
-
+    $count = 1;
     foreach ($posts as $post) {
         if (!$post->parent) {
             continue;
@@ -5727,9 +6135,8 @@ function forum_print_posts_flat($course, &$cm, $forum, $discussion, $post, $mode
         $ownpost = ($USER->id == $post->userid);
 
         $postread = !empty($post->postread);
-
-        forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, $link,
-                             '', '', $postread, true, $forumtracked);
+        forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
+                                 '', '', $postread, true, $forumtracked);
     }
 }
 
@@ -5753,16 +6160,16 @@ function forum_print_posts_threaded($course, &$cm, $forum, $discussion, $parent,
         $canviewfullnames = has_capability('moodle/site:viewfullnames', $modcontext);
 
         foreach ($posts as $post) {
-
+            $count = 1;
             echo '<div class="indent">';
             if ($depth > 0) {
                 $ownpost = ($USER->id == $post->userid);
                 $post->subject = format_string($post->subject);
 
                 $postread = !empty($post->postread);
-
-                forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, $link,
-                                     '', '', $postread, true, $forumtracked);
+                
+                forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
+                                         '', '', $postread, true, $forumtracked);
             } else {
                 if (!forum_user_can_see_post($forum, $discussion, $post, NULL, $cm)) {
                     echo "</div>\n";
@@ -5787,8 +6194,9 @@ function forum_print_posts_threaded($course, &$cm, $forum, $discussion, $parent,
                 echo "</span>";
             }
 
-            forum_print_posts_threaded($course, $cm, $forum, $discussion, $post, $depth-1, $reply, $forumtracked, $posts);
+            forum_print_posts_threaded($course, $cm, $forum, $discussion, $post, $depth-1, $reply, $forumtracked, $posts,$parentid);
             echo "</div>\n";
+            $count = $count + 1;
         }
     }
 }
@@ -5799,16 +6207,22 @@ function forum_print_posts_threaded($course, &$cm, $forum, $discussion, $parent,
  * @global object
  * @return void
  */
-function forum_print_posts_nested($course, &$cm, $forum, $discussion, $parent, $reply, $forumtracked, $posts) {
-    global $USER, $CFG;
-
+ $flag = 0;
+function forum_print_posts_nested($course, &$cm, $forum, $discussion, $parent, $reply, $forumtracked, $posts,$parentid = 0,$count = 1,$flag = 0) {
+    global $USER, $CFG,$DB;
+    
     $link  = false;
-
+    $modcontext       = context_module::instance($cm->id);
     if (!empty($posts[$parent->id]->children)) {
         $posts = $posts[$parent->id]->children;
-
+        
         foreach ($posts as $post) {
-
+            
+            if((show_discussion($parentid,$forum) and ($post->userid != $USER->id) and !$flag) && !has_capability('mod/forum:editanypost', $modcontext)){
+                continue;
+            }
+            else
+                $flag = 1;
             echo '<div class="indent">';
             if (!isloggedin()) {
                 $ownpost = false;
@@ -5818,11 +6232,26 @@ function forum_print_posts_nested($course, &$cm, $forum, $discussion, $parent, $
 
             $post->subject = format_string($post->subject);
             $postread = !empty($post->postread);
-
-            forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, $link,
-                                 '', '', $postread, true, $forumtracked);
-            forum_print_posts_nested($course, $cm, $forum, $discussion, $post, $reply, $forumtracked, $posts);
+            if($forum->type == 'collaborate' and $post->parent == $parentid){
+                $regionid = 'forum-questionview'.$count;
+                print_collapsible_region_start('', $regionid, get_string('questionview','forum'));
+                forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
+                                     '', '', $postread, true, $forumtracked,false,$parentid);
+            }
+            else{
+                forum_print_post($post, $discussion, $forum, $cm, $course, $ownpost, $reply, false,
+                                     '', '', $postread, true, $forumtracked,false,$parentid);
+            }
+            if($forum->type == 'collaborate'){
+                $n = $DB->count_records('forum_posts',array('parent' => $post->id));
+                if($n == 0)
+                    print_collapsible_region_end();
+            }
+            
+            forum_print_posts_nested($course, $cm, $forum, $discussion, $post, $reply, $forumtracked, $posts,$parentid,$count+1,$flag);
+            $flag = 0;
             echo "</div>\n";
+            $count = $count + 1;
         }
     }
 }
@@ -7060,7 +7489,8 @@ function forum_get_forum_types() {
                   'eachuser' => get_string('eachuserforum', 'forum'),
                   'single'   => get_string('singleforum', 'forum'),
                   'qanda'    => get_string('qandaforum', 'forum'),
-                  'blog'     => get_string('blogforum', 'forum'));
+                  'blog'     => get_string('blogforum', 'forum'),
+                  'collaborate' => get_string('collaborationforum','forum'));
 }
 
 /**
@@ -7075,7 +7505,8 @@ function forum_get_forum_types_all() {
                   'eachuser' => get_string('eachuserforum', 'forum'),
                   'single'   => get_string('singleforum', 'forum'),
                   'qanda'    => get_string('qandaforum', 'forum'),
-                  'blog'     => get_string('blogforum', 'forum'));
+                  'blog'     => get_string('blogforum', 'forum'),
+                  'collaborate' => get_string('collaborationforum','forum'));
 }
 
 /**
@@ -7895,3 +8326,27 @@ function mod_forum_myprofile_navigation(core_user\output\myprofile\tree $tree, $
 
     return true;
 }
+
+/**
+    depend if to show a discussion
+    
+    @param @userid current user id
+    @forum forum id
+    @discussion discussion id
+    @postid post id
+    @parentid question post id
+
+    
+    @return bool
+*/
+function show_discussion($parentid,$forum){
+    global $DB,$USER;
+//    $show  = show_discussion($post->userid,$forum,$discussion,$post->id,$parentid);
+    $postuser = $DB->get_record('forum_accepte',array('post' => $parentid));
+    if( ($forum->type == 'collaborate') and (!$postuser->accepted) and ($USER->id != $postuser->userid)){
+        return true;
+    }
+    else
+        return false; 
+}
+

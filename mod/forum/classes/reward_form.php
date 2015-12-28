@@ -35,7 +35,7 @@ require_once("$CFG->libdir/formslib.php");
  * @copyright  2015 Martin Mastny <mastnym@vscht.cz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_forum_prune_form extends moodleform {
+class mod_forum_reward_form extends moodleform {
 
     /**
      * Form constructor.
@@ -44,11 +44,11 @@ class mod_forum_prune_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('text', 'name', get_string('pointreward', 'forum'), array('size' => '60', 'maxlength' => '255'));
+        $mform->addElement('text', 'name', get_string('discussionname', 'forum'), array('size' => '60', 'maxlength' => '255'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $this->add_action_buttons(true, get_string('confirm', 'forum'));
+        $this->add_action_buttons(true, get_string('prune', 'forum'));
 
         $mform->addElement('hidden', 'reward');
         $mform->setType('reward', PARAM_INT);
